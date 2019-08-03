@@ -18,7 +18,7 @@ int highscore;
 E2Solver::E2Solver() {
     Initialisation();
     Indexation();
-    this->solutionCount = 0;
+    this->hitCount = 0;
     level=0;
     highscore=0;
 };
@@ -29,18 +29,18 @@ int E2Solver::solve(std::string job) {
     this->lastPosition = myJob->GetLastPosition();
     level = myJob->GetStartingLevel();
     Explore(pos);
-    int result = this->solutionCount;
+    int result = this->hitCount;
     this->cleanUp();
     return result;
 };
 
 int E2Solver::getSolutionCount() {
-    return this->solutionCount;
+    return this->hitCount;
 }
 
 void E2Solver::cleanUp() {
     Reinitialisation();
-    this->solutionCount = 0;
+    this->hitCount = 0;
     level=0;
     highscore=0;
 }
@@ -54,8 +54,16 @@ void E2Solver::claimNewScore(int* lvl, int* highlvl)
     }
 }
 
-void E2Solver::printCurrentSolution() {
-    info("Solution " + std::to_string( this->solutionCount ) + " : " + *(E2Job::boardToString()) );
+void E2Solver::printCurrentState() {
+
+#ifdef DEPTH_FIRST_SEARCH
+    info("Solution " + std::to_string( this->hitCount ) + " : " + *(E2Job::boardToString()) );
+#endif
+
+#ifdef BREADTH_FIRST_SEARCH
+    info("Result " + std::to_string( this->hitCount ) + " : " + *(E2Job::boardToString()) );
+#endif
+
 }
 
 bool E2Solver::Explore(Position** pposition)
@@ -91,15 +99,22 @@ bool E2Solver::Explore(Position** pposition)
             
             //this->claimNewScore(&level, &highscore);
             
+#ifdef DEPTH_FIRST_SEARCH
             if( pposition!=this->lastPosition ) {
 
                 result = Explore( pposition+1 );
             } 
             else
             {
-                this->solutionCount++;
-                this->printCurrentSolution();
+                this->hitCount++;
+                this->printCurrentState();
             }
+#endif
+
+#ifdef BREADTH_FIRST_SEARCH
+            this->hitCount++;
+            this->printCurrentState();   
+#endif
 
             // free the piece
             candidate->Origin->available = true;

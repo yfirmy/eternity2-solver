@@ -16,7 +16,10 @@ class E2Solver {
 
 private:
     Position** lastPosition;
-    int solutionCount;
+
+    // solutions count (for Depth First Search)
+    // children count (for Breadth First Search) 
+    int hitCount;
 
 public:
     E2Solver();
@@ -26,7 +29,7 @@ public:
 private:
     bool Explore(Position** pposition);
     void claimNewScore(int* lvl, int* highlvl);
-    void printCurrentSolution();
+    void printCurrentState();
     void cleanUp();
 };
 

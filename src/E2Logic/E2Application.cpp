@@ -11,7 +11,7 @@
 #include "E2Logger.h"
 #include "E2Size.h"
 
-#define VERSION "1.0.0"
+#define VERSION "1.1.0"
 
 Application::Application(std::string name, std::string defaultInitialJob) : _name(name), _defaultInitialJob(defaultInitialJob) {
 }
@@ -31,6 +31,14 @@ void Application::help() {
 int Application::main(int argc, const char * argv[]) {
 
     info("Eternity 2 Backtracker - " + this->_name);
+
+#ifdef DEPTH_FIRST_SEARCH
+    info("Compiled for Depth-First Search");
+#endif
+
+#ifdef BREADTH_FIRST_SEARCH
+    info("Compiled for Breadth-First Search (1 level)");
+#endif
 
     if (argc > 2 ) {
         usage();
