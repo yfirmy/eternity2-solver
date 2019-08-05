@@ -4,25 +4,26 @@
 
 A simple backtracker solver, to solve the ["Eternity II" puzzle challenge](https://en.wikipedia.org/wiki/Eternity_II_puzzle).
 
-This is a mono-thread tree exploration, through the Eternity II solutions space.
+This is a mono-thread tree exploration, through the Eternity II solutions space, written in C++.
+The unit tests, and REST API Wrapper, are written in Python.
 
 Two exploration strategies are implemented, and compiled in two different binaries:
  - ["Depth-First Search"](https://en.wikipedia.org/wiki/Depth-first_search) (DFS): default strategy to search for the deepest leaf through the tree
- - ["Breadth-First Search"](https://en.wikipedia.org/wiki/Breadth-first_search) (BFS): intended to be used to ["divide the problem"](https://en.wikipedia.org/wiki/Divide-and-conquer_algorithm) in smaller sub-problems.
+ - ["Breadth-First Search"](https://en.wikipedia.org/wiki/Breadth-first_search) (BFS): intended to be used to ["divide the problem"](https://en.wikipedia.org/wiki/Divide-and-conquer_algorithm) in smaller sub-problems, via the REST API.
 
 ## Design goals
 
-This "DFS solver" is designed to be very simple and portable, to be executed in parrallel, and orchestrated externally.
-
+The *DFS solver* is designed to be very simple and portable, to be executed in parrallel, and orchestrated externally.
 The goal will be to achieve a massive parallelization of this "DFS solver" on a cloud via containers scalability.
 
-In a near future, an orchestrator server will use the "BFS solver" version, to gradually divide the search space, and to dispatch the workload between workers.
+The *BFS solver* is very similar, and designed to be used via its REST API, by a future orchestrator server, to gradually divide the search space, in order to dispatch the workload between workers.
 
 ## History
 
  - 2009 : first versions "E2Breaker" : Multi-thread Windows Client/Server application (up to 14 clients in parallel)
  - 2018 : rebirth of the project: refactoring to a simple Monothread Linux application (no more threading, no more winsock) 
- - 2019 : improvements for publishing on GitHub : added non-regression tests, added "Clue 1" solving, added GNU license
+ - 2019/02 : improvements for publishing on GitHub : added non-regression tests, added "Clue 1" solving, added GNU license
+ - 2019/08 : added "Breadth-First Search" strategy, and a REST API for it.
 
 ## Build the project
 
@@ -57,4 +58,14 @@ Examples for a small 4x4 puzzle board:
  ```
  $2W:24E:.:.:.:.:.:.:.:.:.:.:.:.:.:.:;
  ```
+
+ ## REST API for the Breadth-First Search
+
+To enable the HTTP REST API, execute the following python script:
+`python web/eternity2-solver-http.py --conf conf/puzzle.ini`
+
+ | GET | PUT | DELETE | POST | Path                                    | Description                             |
+ | :-- | :-- | :----- | :--- | :-------------------------------------- | :-------------------------------------- |
+ | X   |     |        |      | /api/eternity2-solver/v1/sub-jobs/_job_ | Returns a list of sub-jobs (JSON format). Example: `[{"job": "$24E:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:;"}, {"job": "$20N:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:;"}]` |
+
 
