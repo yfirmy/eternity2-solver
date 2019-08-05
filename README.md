@@ -5,7 +5,8 @@
 A simple backtracker solver, to solve the ["Eternity II" puzzle challenge](https://en.wikipedia.org/wiki/Eternity_II_puzzle).
 
 This is a mono-thread tree exploration, through the Eternity II solutions space, written in C++.
-The unit tests, and REST API Wrapper, are written in Python.
+
+The REST API Wrapper, and the unit tests, are written in Python.
 
 Two exploration strategies are implemented, and compiled in two different binaries:
  - ["Depth-First Search"](https://en.wikipedia.org/wiki/Depth-first_search) (DFS): default strategy to search for the deepest leaf through the tree
@@ -13,10 +14,10 @@ Two exploration strategies are implemented, and compiled in two different binari
 
 ## Design goals
 
-The *DFS solver* is designed to be very simple and portable, to be executed in parrallel, and orchestrated externally.
+The **DFS solver** is designed to be very simple and portable, to be executed in parrallel, and orchestrated externally.
 The goal will be to achieve a massive parallelization of this "DFS solver" on a cloud via containers scalability.
 
-The *BFS solver* is very similar, and designed to be used via its REST API, by a future orchestrator server, to gradually divide the search space, in order to dispatch the workload between workers.
+The **BFS solver** is very similar, and designed to be used via its REST API, by a future orchestrator server, to gradually divide the search space, in order to dispatch the workload between workers.
 
 ## History
 
@@ -27,7 +28,8 @@ The *BFS solver* is very similar, and designed to be used via its REST API, by a
 
 ## Build the project
 
-Please use the Makefile .
+Please use the Makefile.
+
 No dependency.
 
 ## Input and Outputs
@@ -62,10 +64,12 @@ Examples for a small 4x4 puzzle board:
  ## REST API for the Breadth-First Search
 
 To enable the HTTP REST API, execute the following python script:
-`python web/eternity2-solver-http.py --conf conf/puzzle.ini`
+```
+python web/eternity2-solver-http.py --conf web/conf/puzzle.ini
+```
 
  | GET | PUT | DELETE | POST | Path                                    | Description                             |
  | :-- | :-- | :----- | :--- | :-------------------------------------- | :-------------------------------------- |
  | X   |     |        |      | /api/eternity2-solver/v1/sub-jobs/_job_ | Returns a list of sub-jobs (JSON format). Example: `[{"job": "$24E:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:;"}, {"job": "$20N:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:;"}]` |
 
-
+The _job_ parameter being expected in the "Board Description Format"
