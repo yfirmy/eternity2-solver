@@ -6,7 +6,7 @@ A simple backtracker solver, to solve the ["Eternity II" puzzle challenge](https
 
 This is a mono-thread tree exploration, through the Eternity II solutions space, written in C++.
 
-The REST API Wrapper, and the unit tests, are written in Python.
+The wrapper scripts, and the unit tests, are written in Python.
 
 Two exploration strategies are implemented, and compiled in two different binaries:
  - ["Depth-First Search"](https://en.wikipedia.org/wiki/Depth-first_search) (DFS): default strategy to search for the deepest leaf through the tree
@@ -17,7 +17,14 @@ Two exploration strategies are implemented, and compiled in two different binari
 The **DFS solver** is designed to be very simple and portable, to be executed in parrallel, and orchestrated externally.
 The goal will be to achieve a massive parallelization of this "DFS solver" on a cloud via containers scalability.
 
-The **BFS solver** is very similar, and designed to be used via its REST API, by a future orchestrator server, to gradually divide the search space, in order to dispatch the workload between workers.
+The **BFS solver** is very similar, and designed to be used via its REST API, by the [Eternity II Server](https://github.com/yfirmy/eternity2-server), to gradually divide the search space, in order to dispatch the workload between workers.
+
+## The Wrapper scripts
+
+In order to make theses solvers interact with the [Eternity II Server](https://github.com/yfirmy/eternity2-server), two scripts are available:
+
+ - A **REST API Script** is exposing the **BFS Solver** as a web service (called by the [Eternity II Server](https://github.com/yfirmy/eternity2-server))
+ - A **Job Puller Script** is pulling jobs to solve (calling the [Eternity II Server](https://github.com/yfirmy/eternity2-server)) and providing them to the **DFS Solver** via command line.
 
 ## History
 
@@ -25,12 +32,18 @@ The **BFS solver** is very similar, and designed to be used via its REST API, by
  - 2018 : rebirth of the project: refactoring to a simple Monothread Linux application (no more threading, no more winsock) 
  - 2019/02 : improvements for publishing on GitHub : added non-regression tests, added "Clue 1" solving, added GNU license
  - 2019/08 : added "Breadth-First Search" strategy, and a REST API for it.
+ - 2019/10 : added a "Job Puller Script", to request Jobs from the [Eternity II server](https://github.com/yfirmy/eternity2-server), and to solve locally.
 
 ## Build the project
 
 Please use the Makefile.
 
-No dependency.
+- No dependency for the C++ Solver Core
+- Python for the "Wrapper Scripts" and Tests
+
+## Compatibility
+
+The "Wrapper Scripts" are compatible with [Eternity II server](https://github.com/yfirmy/eternity2-server) **version 1.2.1**
 
 ## Input and Outputs
 
