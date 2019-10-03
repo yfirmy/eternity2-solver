@@ -79,7 +79,7 @@ def subjobs(job):
     return response
 
 def usage():
-  print "usage: python web/eternity2-solver-http.py --conf conf/properties.ini"
+  print "usage: python web/eternity2-solver-http.py --conf web/conf/properties.ini"
   exit(1)
 
 if __name__ == "__main__":
@@ -88,4 +88,4 @@ if __name__ == "__main__":
        usage()
 
      config.read(sys.argv[2])
-     app.run(host='0.0.0.0', port=config.get('Server', 'port'))
+     app.run(host='0.0.0.0', port=int(config.get('Server', 'port')))

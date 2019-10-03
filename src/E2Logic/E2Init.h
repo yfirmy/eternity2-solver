@@ -7,6 +7,7 @@
 #ifndef E2INIT
 #define E2INIT
 
+#include <vector>
 #include "E2Model/E2Types.h"
 
 void Initialisation();

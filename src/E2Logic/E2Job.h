@@ -9,6 +9,7 @@
 
 #include <iostream>
 #include <string>
+#include <cstring>
 #include <utility>
 #include "E2Model/E2Types.h"
 
@@ -60,7 +61,7 @@ public:
 		if( separator-next > 1 )
 		{
 			char* buffer = (char*) malloc( (separator-next)*sizeof(char) );
-			strcpy( buffer,  this->job.GetString().substr( next, separator-next-1 ).c_str() );
+			std::strcpy( buffer,  this->job.GetString().substr( next, separator-next-1 ).c_str() );
 			buffer[separator-next-1] = '\0';
 			*noPiece = atoi( buffer );
 			switch( direction )
