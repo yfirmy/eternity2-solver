@@ -11,10 +11,11 @@ import re
 import subprocess
 import sys
 import requests
-import ConfigParser
+import configparser
 import logging
 import json
 import signal
+import time
 from datetime import datetime
 
 class Result:
@@ -87,11 +88,13 @@ class E2ServerWrapper:
   
   def __init__(self, config):
       self.basepath = config.get('Server', 'basepath')
+      api_path = "api/eternity2-server/v1/"
       self.user = config.get('Server', 'user')
       self.password = config.get('Server', 'password')
-      self.url_jobs = self.basepath + "jobs?size={}"
-      self.url_result = self.basepath + "result"
-      self.url_status = self.basepath + "status"
+      self.url_jobs = self.basepath + api_path + "jobs?size={}"
+      self.url_result = self.basepath + api_path + "result"
+      self.url_status = self.basepath + api_path + "status"
+      self.url_health = self.basepath + "health"
 
   def http_get(self, path):
       response = requests.get( path, auth=(self.user, self.password) )
@@ -136,22 +139,27 @@ class E2ServerWrapper:
       body = {"job": job, "status": "PENDING", "dateJobTransmission": retrievalDate, "dateStatusUpdate": now()}
       return json.dumps(body)
 
+  def check_health(self):
+      status = self.http_get( self.url_health )
+      logging.debug("Server status = {}".format(str(status)))
 
 class Application:
 
   def __init__(self, configuration_filename):
-      self.config = ConfigParser.RawConfigParser()
+      self.config = configparser.RawConfigParser()
       self.config.read(configuration_filename)
-      logfile = self.config.get('Logger', 'file')
       loglevel = self.config.get('Logger', 'level')
-      logging.basicConfig(filename=logfile, level=loglevel, format='%(asctime)s [%(levelname)-5s] %(name)s: %(message)s')
+      logging.basicConfig(stream=sys.stdout, level=loglevel, format='%(asctime)s [%(levelname)-5s] %(name)s: %(message)s')
       self.solver = E2SolverWrapper(self.config)
       self.server = E2ServerWrapper(self.config)
       self.interruption_requested = False
 
   def main(self):
 
+      logging.info("Eternity II Job Puller Script")
       jobSize = self.solver.check_solver_capacity()
+
+      self.server.check_health()
 
       while(not self.interrupted()):
           jobs = self.server.retrieve_jobs(jobSize)
@@ -164,6 +172,7 @@ class Application:
                   break
               except requests.exceptions.HTTPError as e:
                 logging.error('Impossible to lock job ' + job)
+          time.sleep(5)
 
       logging.info("Interrupted. Goodbye.")
 
@@ -186,7 +195,7 @@ def register_signals():
     signal.signal(signal.SIGINT, receiveSignal)
 
 def usage():
-  print "usage: python pull/eternity2-job-puller.py --conf puller/conf/properties.ini"
+  print("usage: python pull/eternity2-job-puller.py --conf puller/conf/properties.ini")
   exit(1)
 
 if __name__ == "__main__":

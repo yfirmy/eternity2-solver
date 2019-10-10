@@ -31,6 +31,7 @@ void Application::help() {
 int Application::main(int argc, const char * argv[]) {
 
     info("Eternity 2 Backtracker - " + this->_name);
+    info("Version: " + std::string(VERSION));
 
 #ifdef DEPTH_FIRST_SEARCH
     info("Compiled for Depth-First Search");

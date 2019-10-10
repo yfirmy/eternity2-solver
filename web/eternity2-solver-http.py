@@ -78,6 +78,15 @@ def subjobs(job):
     )
     return response
 
+@app.route("/api/eternity2-solver/v1/health")
+def health():
+    response = app.response_class(
+        response = "{\"status\": \"UP\"}",
+        status = 200,
+        mimetype = 'application/json'
+    )
+    return response
+
 def usage():
   print "usage: python web/eternity2-solver-http.py --conf web/conf/properties.ini"
   exit(1)
@@ -88,4 +97,4 @@ if __name__ == "__main__":
        usage()
 
      config.read(sys.argv[2])
-     app.run(host='0.0.0.0', port=int(config.get('Server', 'port')))
+     app.run(host='127.0.0.1', port=int(config.get('Server', 'port')))
