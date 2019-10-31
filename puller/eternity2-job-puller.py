@@ -10,6 +10,7 @@
 import re
 import subprocess
 import sys
+import os
 import requests
 import configparser
 import logging
@@ -90,11 +91,16 @@ class E2ServerWrapper:
       self.basepath = config.get('Server', 'basepath')
       api_path = "api/eternity2-server/v1/"
       self.user = config.get('Server', 'user')
-      self.password = config.get('Server', 'password')
+      self.password = self.read_password(config)
       self.url_jobs = self.basepath + api_path + "jobs?size={}"
       self.url_result = self.basepath + api_path + "result"
       self.url_status = self.basepath + api_path + "status"
       self.url_health = self.basepath + "health"
+
+  def read_password(self, config):
+      with open( config.get('Server', 'password.file'), 'r') as file:
+           password = file.read().replace('\n', '')
+      return password
 
   def http_get(self, path):
       response = requests.get( path, auth=(self.user, self.password) )
@@ -146,7 +152,7 @@ class E2ServerWrapper:
 class Application:
 
   def __init__(self, configuration_filename):
-      self.config = configparser.RawConfigParser()
+      self.config = configparser.ConfigParser(os.environ)
       self.config.read(configuration_filename)
       loglevel = self.config.get('Logger', 'level')
       logging.basicConfig(stream=sys.stdout, level=loglevel, format='%(asctime)s [%(levelname)-5s] %(name)s: %(message)s')

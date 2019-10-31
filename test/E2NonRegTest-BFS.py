@@ -14,13 +14,6 @@ import subprocess
 
 class E2NonRegTest(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(self):
-      #pClean = subprocess.Popen(["make", "clean"])
-      #(stdoutData, stderrData) = pClean.communicate()
-      pMake = subprocess.Popen(["make"])
-      (stdoutData, stderrData) = pMake.communicate()
-
     def execute_commands(self, executable, commands):
       p = subprocess.Popen([executable], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
       (stdoutData, stderrData) = p.communicate('\n'.join(commands)+'\nexit\n')

@@ -1,0 +1,13 @@
+version: '3.7'
+
+services:
+   puller:
+     image: yfirmy/eternity2-solver-challenge:latest
+     environment:
+       ETERNITY2_SERVER_PUZZLE_PASSWORD_FILE: /run/secrets/server_puzzle_password
+     secrets:
+       - server_puzzle_password
+
+secrets:
+   server_puzzle_password:
+     file: ../puller/secrets/puzzle_password

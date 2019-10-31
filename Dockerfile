@@ -8,7 +8,17 @@ ARG binary
 COPY ./src /usr/src/eternity2-solver/src/
 COPY ./makefile /usr/src/eternity2-solver/
 WORKDIR /usr/src/eternity2-solver
-RUN make $binary
+RUN make
+
+# --- test image
+
+FROM python:alpine3.10 as tester
+ARG binary
+
+COPY --from=builder "/usr/src/eternity2-solver/bin/*" /app/eternity2-solver/bin/
+COPY ./test/E2NonRegTest-DFS.py /app/eternity2-solver/test/
+WORKDIR /app/eternity2-solver/
+RUN python ./test/E2NonRegTest-DFS.py
 
 # --- runtime image ---
 
