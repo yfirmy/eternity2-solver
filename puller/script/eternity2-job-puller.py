@@ -44,7 +44,8 @@ class E2SolverWrapper:
 
   def execute_command(self, command, jobs):
       p = subprocess.Popen([command], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      (stdoutData, stderrData) = p.communicate('\n'.join(jobs)+'\nexit\n')
+      commandline = '\n'.join(jobs)+'\nexit\n'
+      (stdoutData, stderrData) = p.communicate(commandline.encode('utf-8'))
       return stdoutData.decode("utf-8")
 
   def parse_result(self, line, foundSolutionsList):

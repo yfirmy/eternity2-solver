@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
    puller:
-     image: yfirmy/eternity2-solver-sample:latest
+     image: yfirmy/eternity2-puller-sample:latest
      environment:
        ETERNITY2_SERVER_SAMPLE_PASSWORD_FILE: /run/secrets/server_sample_password
      secrets:
@@ -10,4 +10,4 @@ services:
 
 secrets:
    server_sample_password:
-     file: ../puller/secrets/sample_password
+     file: ../secrets/sample_password

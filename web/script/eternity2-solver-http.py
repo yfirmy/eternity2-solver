@@ -11,10 +11,10 @@ from flask import Flask, abort
 import sys
 import re
 import subprocess
-import ConfigParser
+import configparser
 
 app = Flask(__name__)
-config = ConfigParser.RawConfigParser()
+config = configparser.ConfigParser()
 
 class E2SolverExecutor:
 
@@ -39,7 +39,8 @@ class E2SolverExecutor:
 
     def execute_command(self, command, jobs):
       p = subprocess.Popen([command], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      (stdoutData, stderrData) = p.communicate('\n'.join(jobs)+'\nexit\n')
+      commandline = '\n'.join(jobs)+'\nexit\n'
+      (stdoutData, stderrData) = p.communicate(commandline.encode('utf-8'))
       return stdoutData.decode("utf-8")
 
     def parse_result(self, line, foundSolutionsList):
@@ -88,7 +89,7 @@ def health():
     return response
 
 def usage():
-  print "usage: python web/eternity2-solver-http.py --conf web/conf/properties.ini"
+  print("usage: python web/eternity2-solver-http.py --conf web/conf/properties.ini")
   exit(1)
 
 if __name__ == "__main__":
@@ -97,4 +98,4 @@ if __name__ == "__main__":
        usage()
 
      config.read(sys.argv[2])
-     app.run(host='127.0.0.1', port=int(config.get('Server', 'port')))
+     app.run(host='0.0.0.0', port=int(config.get('Server', 'port')))

@@ -1,5 +1,3 @@
-ARG binary=E2Puzzle-dfs
-ARG configuration=puzzle.ini
 
 # --- builder image ---
 
@@ -12,29 +10,19 @@ RUN make
 
 # --- test image
 
-FROM python:alpine3.10 as tester
+FROM python:3.5.8-alpine3.10 as tester
 ARG binary
 
 COPY --from=builder "/usr/src/eternity2-solver/bin/*" /app/eternity2-solver/bin/
 COPY ./test/E2NonRegTest-DFS.py /app/eternity2-solver/test/
+COPY ./test/E2NonRegTest-BFS.py /app/eternity2-solver/test/
 WORKDIR /app/eternity2-solver/
-RUN python ./test/E2NonRegTest-DFS.py
+RUN python ./test/E2NonRegTest-DFS.py && \
+    python ./test/E2NonRegTest-BFS.py
 
-# --- runtime image ---
+# --- runtime image
 
-FROM python:alpine3.10
-ARG binary
-ARG configuration
+FROM alpine:3.10.2 as runtime
 
-LABEL maintainer="Yohan FIRMY (yfirmy)"
-
-COPY --from=builder "/usr/src/eternity2-solver/bin/$binary" /app/eternity2-solver/bin/
-COPY ./puller/eternity2-job-puller.py /app/eternity2-solver/puller/
-COPY ./puller/requirements.txt /app/eternity2-solver/puller/
-COPY "./puller/conf/$configuration" /app/eternity2-solver/puller/configuration.ini
+COPY --from=builder "/usr/src/eternity2-solver/bin/*" /app/eternity2-solver/bin/
 WORKDIR /app/eternity2-solver/
-
-RUN pip install -r ./puller/requirements.txt
-RUN rm -f ./puller/requirements.txt
-
-CMD [ "python", "./puller/eternity2-job-puller.py", "--conf", "puller/configuration.ini" ]

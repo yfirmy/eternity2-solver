@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
    puller:
-     image: yfirmy/eternity2-solver-clue1:latest
+     image: yfirmy/eternity2-puller-clue1:latest
      environment:
        ETERNITY2_SERVER_CLUE1_PASSWORD_FILE: /run/secrets/server_clue1_password
      secrets:
@@ -10,4 +10,4 @@ services:
 
 secrets:
    server_clue1_password:
-     file: ../puller/secrets/clue1_password
+     file: ../secrets/clue1_password

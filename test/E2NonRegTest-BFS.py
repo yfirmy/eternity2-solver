@@ -16,7 +16,8 @@ class E2NonRegTest(unittest.TestCase):
 
     def execute_commands(self, executable, commands):
       p = subprocess.Popen([executable], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      (stdoutData, stderrData) = p.communicate('\n'.join(commands)+'\nexit\n')
+      commandline = '\n'.join(commands)+'\nexit\n'
+      (stdoutData, stderrData) = p.communicate(commandline.encode('utf-8'))
       return stdoutData.decode("utf-8")
 
     def execute_controlsample(self, commands):
@@ -68,7 +69,7 @@ class E2NonRegTest(unittest.TestCase):
 
     def assert_solutions_count(self, expectedSolutionCount, foundResultsList, initialJob):
       errorMsg = str(len(foundResultsList)) + " results founds from job " + initialJob + "(expected "+ str(expectedSolutionCount)+" results)"
-      self.assertEquals(expectedSolutionCount, len(foundResultsList), errorMsg)
+      self.assertEqual(expectedSolutionCount, len(foundResultsList), errorMsg)
 
     def test_from_empty_board(self):
       job1 = "$.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:;"
