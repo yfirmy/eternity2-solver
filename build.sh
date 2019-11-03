@@ -1,16 +1,34 @@
 #!/bin/sh
 
-echo Building yfirmy/eternity2-solver-sample:latest
+echo Building yfirmy/eternity2-solver-binaries:latest
 
-docker build --build-arg binary=E2ControlSample-dfs --build-arg configuration=control-sample.ini -t yfirmy/eternity2-solver-sample:latest .
+docker build -t yfirmy/eternity2-solver-binaries:latest .
 
-echo Building yfirmy/eternity2-solver-clue1:latest
+docker create --name binaries yfirmy/eternity2-solver-binaries:latest  
+docker cp 'binaries:/app/eternity2-solver/bin' ./web/
+docker cp 'binaries:/app/eternity2-solver/bin' ./puller/
+docker rm -f binaries
 
-docker build --build-arg binary=E2Clue1-dfs --build-arg configuration=clue1.ini -t yfirmy/eternity2-solver-clue1:latest .
+# Only keep necessary binaries for each image type
+rm -f ./web/bin/E2*-dfs
+rm -f ./puller/bin/E2*-bfs
 
-echo Building yfirmy/eternity2-solver-challenge:latest
+cd ./puller
+./build-puller.sh
 
-docker build --build-arg binary=E2Puzzle-dfs --build-arg configuration=puzzle.ini -t yfirmy/eternity2-solver-challenge:latest .
+cd ..
+
+cd ./web
+./build-web.sh
+
+cd ..
+
+# clean-up
+rm -f ./web/bin/E2*-bfs
+rm -f ./puller/bin/E2*-dfs
+
+rmdir ./web/bin
+rmdir ./puller/bin
 
 #
 # To run these docker images, don't forget options to attach stdin/stdout :
