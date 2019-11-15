@@ -32,6 +32,10 @@ class E2SolverWrapper:
       self.resultLinePattern = config.get('Solver', 'solution.pattern')
       self.beginResultLinePattern = config.get('Solver', 'solution.beginning.pattern')
       self.nextResultLinePattern = config.get('Solver', 'solution.following.pattern')
+      self.resultsChunkSize = int(config.get('Solver', 'results.chunk.size'))
+      self.evaluationJob = config.get('Solver', 'performance.evaluation.job')
+      self.referenceTime = int(config.get('Solver', 'performance.reference.time'))
+      self.defaultJobCapacity  =int(config.get('Solver', 'default.job.capacity'))
       self.jobPattern = r'\$((\d{1,3}[WNES]\:)|(\.\:)){'+str(self.boardSize)+r'};'
 
   def fatal(self, message):
@@ -42,49 +46,77 @@ class E2SolverWrapper:
       if not re.match(self.jobPattern, job ):
         self.fatal("bad request: the given job is malformed.")
 
-  def execute_command(self, command, jobs):
-      p = subprocess.Popen([command], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      commandline = '\n'.join(jobs)+'\nexit\n'
-      (stdoutData, stderrData) = p.communicate(commandline.encode('utf-8'))
-      return stdoutData.decode("utf-8")
+  def execute_command(self, command, job, submitter):
+      logging.debug(command)
+      process = subprocess.Popen([command], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      inputJob = job+'\nexit\n'
+      process.stdin.write(inputJob.encode('utf-8'))
+      process.stdin.close()
 
-  def parse_result(self, line, foundSolutionsList):
-      solution = re.sub(self.resultLinePattern, r"\1", line)
-      foundSolutionsList.append(Result(solution, now()))
+      foundResults = []
+      resultsCount = 0
 
-  def parse_results(self, initialboards, results): 
-      foundResults = {}
-      idxInitialBoard = -1
-      for initialboard in initialboards:
-        foundResultsList = []
-        foundResults[initialboard]=foundResultsList
+      while True:
+        output = process.stdout.readline()
+        if output == '' and process.poll() is not None:
+          break
+        if output:
+          line = output.decode('utf-8')
+          self.process_line(line, foundResults)
+          if len(foundResults) >= self.resultsChunkSize:
+             if submitter is not None:
+                submitter(job, foundResults)
+             resultsCount = resultsCount + len(foundResults)
+             del foundResults[:]
 
-      for line in results.split("\n") :
-        if(line.startswith(self.beginResultLinePattern)):
-          idxInitialBoard = idxInitialBoard+1
-          foundResultsList = foundResults[initialboards[idxInitialBoard]]
-          self.parse_result(line, foundResultsList)
-        else:
-          if(line.startswith(self.nextResultLinePattern)):
-            foundResultsList = foundResults[initialboards[idxInitialBoard]]
-            self.parse_result(line, foundResultsList)
-      return foundResults 
+      if len(foundResults) > 0:
+        if submitter is not None:
+           submitter(job, foundResults)
+        resultsCount = resultsCount + len(foundResults)
+        del foundResults[:]
+      
+      return resultsCount
+
+  def process_line(self, line, foundResults):
+      logging.debug(line)
+      if(line.startswith(self.nextResultLinePattern)):
+        solution = re.sub(self.resultLinePattern, r"\1", line)
+        foundResults.append(Result(solution.rstrip(), now()))
 
   def check_solver_capacity(self):
-  	return 24
+    logging.info('Solver performance test at startup:')
+    starttime = time.time()
+    self.solve(self.evaluationJob, None)
+    delay = time.time() - starttime
+    logging.info('This solver can solve the reference job in '+str(delay)+' seconds (reference time is '+str(self.referenceTime)+' sec)')
+    if delay < ( self.referenceTime / 2 ) :
+      category = 'much faster'
+      jobCapacity = self.defaultJobCapacity + 2
+    if delay < ( self.referenceTime - 2 ) :
+      category = 'faster'
+      jobCapacity = self.defaultJobCapacity + 1
+    if delay >= ( self.referenceTime - 2 ) and delay <= ( self.referenceTime + 2 ):
+      category = 'reference'
+      jobCapacity = self.defaultJobCapacity
+    if delay > ( self.referenceTime + 2 ):
+      category = 'slower'
+      jobCapacity = self.defaultJobCapacity - 1
+    if delay > ( self.referenceTime * 2 ):
+      category = 'much slower'
+      jobCapacity = self.defaultJobCapacity - 2
+    logging.info('This solver speed class: '+category)
+    logging.info('Solver job capacity: '+str(jobCapacity))
+    return jobCapacity
 
-  def solve(self, job):
+  def solve(self, job, submitter):
     self.check(job)
     logging.info("Solving job {}".format(job))
-    rawResults = self.execute_command( self.command, [job] )
-    foundResults = self.parse_results( [job], rawResults)
+    resultsCount = self.execute_command( self.command, job, submitter )
     logging.info("Finished solving")
-    if foundResults[job] is not None and len(foundResults[job])>0:
-      logging.info("Found results:\n{}".format( "\n".join( map(lambda r: r.board, foundResults[job]) )))
+    if resultsCount > 0:
+      logging.info("Found {} results.".format(resultsCount))
     else:
       logging.info("No result")
-    return foundResults[job]
-
 
 class E2ServerWrapper:
   
@@ -133,14 +165,16 @@ class E2ServerWrapper:
       self.http_put( self.url_status, self.buildLockPayload(job, retrievalDate) )
 
   def submit(self, job, results):
-      logging.info("Submitting results for job {}".format(job))
+      logging.info("Submitting {} results for job {}".format(len(results), job))
       self.http_put( self.url_result, self.buildResultsPayload(job, results) )
 
   def buildResultsPayload(self, job, results):
       body = {"job": job, "solutions": [], "dateJobTransmission": now() }
       for result in results:
         body.get("solutions").append( {"solution": result.board, "dateSolved": result.date} )
-      return json.dumps(body)
+      payload = json.dumps(body)
+      logging.debug(payload)
+      return payload
 
   def buildLockPayload(self, job, retrievalDate):
       body = {"job": job, "status": "PENDING", "dateJobTransmission": retrievalDate, "dateStatusUpdate": now()}
@@ -174,11 +208,11 @@ class Application:
           for job in jobs:
               try:
                   self.server.lock( job, retrievelDate )
-                  results = self.solver.solve( job )
-                  self.server.submit( job, results )
+                  self.solver.solve( job, self.server.submit )
                   break
               except requests.exceptions.HTTPError as e:
                 logging.error('Impossible to lock job ' + job)
+                logging.error(e)
           time.sleep(5)
 
       logging.info("Interrupted. Goodbye.")
@@ -191,7 +225,7 @@ class Application:
       self.interruption_requested = True
 
 def now():
-    return datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+    return datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
 
 def receiveSignal(signalNumber, frame):
     logging.warning('Received: {}'.format(signalNumber))
