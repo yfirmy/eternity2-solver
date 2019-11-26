@@ -28,6 +28,10 @@ class E2SolverWrapper:
 
   def __init__(self, config):
       self.boardSize = int(config.get('Board', 'size'))
+      self.name = config.get('Solver', 'name')
+      self.version = "1.6.0"
+      self.machineType = config.get('Solver', 'machine.type')
+      self.clusterName = config.get('Solver', 'cluster.name')
       self.command = config.get('Solver', 'command')
       self.resultLinePattern = config.get('Solver', 'solution.pattern')
       self.beginResultLinePattern = config.get('Solver', 'solution.beginning.pattern')
@@ -37,6 +41,7 @@ class E2SolverWrapper:
       self.referenceTime = int(config.get('Solver', 'performance.reference.time'))
       self.defaultJobCapacity  =int(config.get('Solver', 'default.job.capacity'))
       self.jobPattern = r'\$((\d{1,3}[WNES]\:)|(\.\:)){'+str(self.boardSize)+r'};'
+      self.capacity, self.score = self.check_solver_capacity()
 
   def fatal(self, message):
       logging.critical(message)
@@ -46,7 +51,7 @@ class E2SolverWrapper:
       if not re.match(self.jobPattern, job ):
         self.fatal("bad request: the given job is malformed.")
 
-  def execute_command(self, command, job, submitter):
+  def execute_command(self, command, job, submitter, name, version, machineType, clusterName, score):
       logging.debug(command)
       process = subprocess.Popen([command], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
       inputJob = job+'\nexit\n'
@@ -65,13 +70,13 @@ class E2SolverWrapper:
           self.process_line(line, foundResults)
           if len(foundResults) >= self.resultsChunkSize:
              if submitter is not None:
-                submitter(job, foundResults)
+                submitter(name, version, machineType, clusterName, score, job, foundResults)
              resultsCount = resultsCount + len(foundResults)
              del foundResults[:]
 
       if len(foundResults) > 0:
         if submitter is not None:
-           submitter(job, foundResults)
+           submitter(name, version, machineType, clusterName, score, job, foundResults)
         resultsCount = resultsCount + len(foundResults)
         del foundResults[:]
       
@@ -86,7 +91,7 @@ class E2SolverWrapper:
   def check_solver_capacity(self):
     logging.info('Solver performance test at startup:')
     starttime = time.time()
-    self.solve(self.evaluationJob, None)
+    self.solve(None, None, None, None, None, self.evaluationJob, None)
     delay = time.time() - starttime
     logging.info('This solver can solve the reference job in '+str(delay)+' seconds (reference time is '+str(self.referenceTime)+' sec)')
     if delay < ( self.referenceTime / 2 ) :
@@ -106,12 +111,12 @@ class E2SolverWrapper:
       jobCapacity = self.defaultJobCapacity - 2
     logging.info('This solver speed class: '+category)
     logging.info('Solver job capacity: '+str(jobCapacity))
-    return jobCapacity
+    return jobCapacity, ( delay / self.referenceTime )
 
-  def solve(self, job, submitter):
+  def solve(self, name, version, machineType, clusterName, score, job, submitter):
     self.check(job)
     logging.info("Solving job {}".format(job))
-    resultsCount = self.execute_command( self.command, job, submitter )
+    resultsCount = self.execute_command( self.command, job, submitter, name, version, machineType, clusterName, score )
     logging.info("Finished solving")
     if resultsCount > 0:
       logging.info("Found {} results.".format(resultsCount))
@@ -146,6 +151,11 @@ class E2ServerWrapper:
       response = requests.put(path, auth=(self.user, self.password), data=payload, headers=headers)
       response.raise_for_status()
 
+  def http_post(self, path, payload):
+      headers = {'content-type': 'application/json'}
+      response = requests.post(path, auth=(self.user, self.password), data=payload, headers=headers)
+      response.raise_for_status()
+
   def retrieve_jobs(self, jobSize):
       logging.info("Retrieving Jobs of size {}".format(jobSize))
       response = self.http_get( self.url_jobs.format(jobSize) )
@@ -160,24 +170,24 @@ class E2ServerWrapper:
           logging.info("No jobs received.")
       return jobs 
 
-  def lock(self, job, retrievalDate):
+  def lock(self, name, version, machineType, clusterName, score, job, retrievalDate):
       logging.info("Acquiring lock for job {}".format(job))
-      self.http_put( self.url_status, self.buildLockPayload(job, retrievalDate) )
+      self.http_put( self.url_status, self.buildLockPayload(name, version, machineType, clusterName, score, job, retrievalDate) )
 
-  def submit(self, job, results):
+  def submit(self, name, version, machineType, clusterName, score, job, results):
       logging.info("Submitting {} results for job {}".format(len(results), job))
-      self.http_put( self.url_result, self.buildResultsPayload(job, results) )
+      self.http_post( self.url_result, self.buildResultsPayload(name, version, machineType, clusterName, score, job, results) )
 
-  def buildResultsPayload(self, job, results):
-      body = {"job": job, "solutions": [], "dateJobTransmission": now() }
+  def buildResultsPayload(self, name, version, machineType, clusterName, score, job, results):
+      body = {"solver": {"name": name, "version": version, "machineType": machineType, "clusterName": clusterName, "score": score}, "job": job, "solutions": [], "dateJobTransmission": now() }
       for result in results:
         body.get("solutions").append( {"solution": result.board, "dateSolved": result.date} )
       payload = json.dumps(body)
       logging.debug(payload)
       return payload
 
-  def buildLockPayload(self, job, retrievalDate):
-      body = {"job": job, "status": "PENDING", "dateJobTransmission": retrievalDate, "dateStatusUpdate": now()}
+  def buildLockPayload(self, name, version, machineType, clusterName, score, job, retrievalDate):
+      body = {"solver": {"name": name, "version": version, "machineType": machineType, "clusterName": clusterName, "score": score}, "job": job, "status": "PENDING", "dateJobTransmission": retrievalDate, "dateStatusUpdate": now()}
       return json.dumps(body)
 
   def check_health(self):
@@ -198,7 +208,7 @@ class Application:
   def main(self):
 
       logging.info("Eternity II Job Puller Script")
-      jobSize = self.solver.check_solver_capacity()
+      jobSize = self.solver.capacity
 
       self.server.check_health()
 
@@ -207,8 +217,8 @@ class Application:
           retrievelDate = now()
           for job in jobs:
               try:
-                  self.server.lock( job, retrievelDate )
-                  self.solver.solve( job, self.server.submit )
+                  self.server.lock( self.solver.name, self.solver.version, self.solver.machineType, self.solver.clusterName, self.solver.score, job, retrievelDate )
+                  self.solver.solve( self.solver.name, self.solver.version, self.solver.machineType, self.solver.clusterName, self.solver.score, job, self.server.submit )
                   break
               except requests.exceptions.HTTPError as e:
                 logging.error('Impossible to lock job ' + job)
