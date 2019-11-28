@@ -1,10 +1,13 @@
 #!/bin/sh
 
-echo Building yfirmy/eternity2-solver-binaries:latest
+SOLVER_VERSION=1.7.0
+IMAGE_BINARIES=yfirmy/eternity2-solver-binaries
 
-docker build -t yfirmy/eternity2-solver-binaries:latest .
+echo Building $IMAGE_BINARIES:$SOLVER_VERSION
 
-docker create --name binaries yfirmy/eternity2-solver-binaries:latest  
+docker build -t $IMAGE_BINARIES:$SOLVER_VERSION .
+
+docker create --name binaries $IMAGE_BINARIES:$SOLVER_VERSION  
 docker cp 'binaries:/app/eternity2-solver/bin' ./web/
 docker cp 'binaries:/app/eternity2-solver/bin' ./puller/
 docker rm -f binaries
@@ -14,12 +17,12 @@ rm -f ./web/bin/E2*-dfs
 rm -f ./puller/bin/E2*-bfs
 
 cd ./puller
-./build-puller.sh
+./build-puller.sh $SOLVER_VERSION
 
 cd ..
 
 cd ./web
-./build-web.sh
+./build-web.sh $SOLVER_VERSION
 
 cd ..
 

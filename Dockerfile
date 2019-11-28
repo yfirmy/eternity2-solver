@@ -2,7 +2,6 @@
 # --- builder image ---
 
 FROM gcc:9.2 AS builder
-ARG binary
 COPY ./src /usr/src/eternity2-solver/src/
 COPY ./makefile /usr/src/eternity2-solver/
 WORKDIR /usr/src/eternity2-solver
@@ -11,8 +10,6 @@ RUN make
 # --- test image
 
 FROM python:3.5.8-alpine3.10 as tester
-ARG binary
-
 COPY --from=builder "/usr/src/eternity2-solver/bin/*" /app/eternity2-solver/bin/
 COPY ./test/E2NonRegTest-DFS.py /app/eternity2-solver/test/
 COPY ./test/E2NonRegTest-BFS.py /app/eternity2-solver/test/
