@@ -4,7 +4,7 @@ VERSION=$1
 
 IMAGE_SAMPLE=yfirmy/eternity2-puller-sample
 IMAGE_CLUE1=yfirmy/eternity2-puller-clue1
-IMAGE_CHALLENGE=eternity2-puller-challenge
+IMAGE_CHALLENGE=yfirmy/eternity2-puller-challenge
 
 
 echo Building $IMAGE_SAMPLE:$VERSION

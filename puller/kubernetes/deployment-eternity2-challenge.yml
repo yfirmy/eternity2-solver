@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: eternity2-puller-challenge
+  name: eternity2-puller-challenge
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eternity2-puller-challenge
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: eternity2-puller-challenge
+    spec:
+      containers:
+      - image: yfirmy/eternity2-puller-challenge:1.7.1
+        name: eternity2-puller-challenge
+        env:
+        - name: ETERNITY2_SERVER_PUZZLE_PASSWORD_FILE
+          value: "/app/eternity2-solver/secrets/eternity2_server_password"
+        - name: ETERNITY2_SOLVER_MACHINE_TYPE
+          value: "t3.medium"
+        - name: ETERNITY2_SOLVER_CLUSTER_NAME
+          value: "aws-eks-prod"
+        volumeMounts:
+        - name: password
+          mountPath: "/app/eternity2-solver/secrets"
+          readOnly: true
+        resources: {}
+      volumes:
+      - name: password
+        secret:
+          secretName: eternity2-server-challenge-password
+status: {}

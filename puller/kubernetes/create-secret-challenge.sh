@@ -1,0 +1,1 @@
+kubectl create secret generic eternity2-server-challenge-password --from-file=eternity2_server_password=./eternity2-serveur-challenge-password.txt
