@@ -1,6 +1,6 @@
 #!/bin/sh
 
-SOLVER_VERSION=1.7.2
+SOLVER_VERSION=$(cat ./version.txt)
 
 IMAGE_SOLVER_BINARIES=yfirmy/eternity2-solver-binaries
 

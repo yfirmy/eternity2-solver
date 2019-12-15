@@ -46,4 +46,12 @@ struct Position
 	OrientedPiece* Here;
 };
 
+struct PuzzlePiece
+{ 
+	Color C1; 
+	Color C2; 
+	Color C3; 
+	Color C4;
+};
+
 #endif // E2TYPES

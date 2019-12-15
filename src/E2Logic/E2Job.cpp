@@ -10,12 +10,12 @@
 #include <vector>
 #include <utility>
 
-#include "E2Job.h"
+#include "E2Job.hpp"
 #include "E2Model/E2Types.h"
 #include "E2Model/E2Model.h"
-#include "E2Logic/E2Logger.h"
-#include "E2Trace.h"
-#include "E2Init.h"
+#include "E2Logic/E2Logger.hpp"
+#include "E2Trace.hpp"
+#include "E2Init.hpp"
 #include "E2Size.h"
 
 extern Piece Bag[BORDER_SIZE*BORDER_SIZE];
@@ -89,13 +89,14 @@ Position** E2Job::findLastPositionFromPath()
 {
     bool found=false;
     int i=BORDER_SIZE*BORDER_SIZE-1;
-    Position** result = NULL;
+    //Position** result = NULL;
 	
     while(!found && i>=0)
     {
         if( Path[i]->Here == NULL ) {
             if( i==BORDER_SIZE*BORDER_SIZE-1 || Path[i+1]->Here != NULL ) {
-                result= (Path+i); found=true;
+                //result= (Path+i); 
+                found=true;
             }
         }
         i--;

@@ -4,10 +4,10 @@
 //  Copyright © 2009-2019 Yohan Firmy
 //
 
-#include "E2Solver.h"
+#include "E2Solver.hpp"
 #include "E2Model/E2Model.h"
-#include "E2Logger.h"
-#include "E2Trace.h"
+#include "E2Logger.hpp"
+#include "E2Trace.hpp"
 
 #include <vector>
 

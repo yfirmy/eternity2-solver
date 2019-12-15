@@ -7,7 +7,7 @@
 #include "E2Size.h"
 #include "E2Model/E2Types.h"
 #include "E2Model/E2Model.h"
-#include "E2Job.h"
+#include "E2Job.hpp"
 
 #include <iostream>
 #include <time.h>

@@ -1,7 +1,11 @@
 #!/bin/sh
 
-SOLVER_VERSION=1.7.2
+SOLVER_VERSION=$(cat ./version.txt)
 IMAGE_BINARIES=yfirmy/eternity2-solver-binaries
+
+echo Prepare building version $SOLVER_VERSION
+
+sed -e "s/{{solver.version}}/$SOLVER_VERSION/g" ./src/E2Logic/E2Application.cpp.j2 > ./src/E2Logic/E2Application.cpp
 
 echo Building $IMAGE_BINARIES:$SOLVER_VERSION
 
@@ -29,6 +33,7 @@ cd ..
 # clean-up
 rm -f ./web/bin/E2*-bfs
 rm -f ./puller/bin/E2*-dfs
+rm -f ./src/E2Logic/E2Application.cpp
 
 rmdir ./web/bin
 rmdir ./puller/bin

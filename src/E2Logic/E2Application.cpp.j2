@@ -6,12 +6,12 @@
 
 #include <iostream>
 
-#include "E2Application.h"
-#include "E2Solver.h"
-#include "E2Logger.h"
+#include "E2Application.hpp"
+#include "E2Solver.hpp"
+#include "E2Logger.hpp"
 #include "E2Size.h"
 
-#define VERSION "1.7.2"
+#define VERSION "{{solver.version}}"
 
 Application::Application(std::string name, std::string defaultInitialJob) : _name(name), _defaultInitialJob(defaultInitialJob) {
 }

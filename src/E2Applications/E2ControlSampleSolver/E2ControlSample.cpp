@@ -4,7 +4,7 @@
 //  Copyright © 2009-2019 Yohan Firmy
 //
 
-#include "E2ControlSample.h"
+#include "E2ControlSample.hpp"
 
 int main(int argc, const char * argv[]) {
     Application* app = new Application("Control Sample Version", "$.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:;");

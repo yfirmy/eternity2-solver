@@ -11,7 +11,9 @@
 
 #include "E2Model/E2Types.h"
 
-Piece Bag[25] = {
+Piece Bag[25];
+
+PuzzlePiece BagInitializer[25] = {
     
     {WALL,WALL,A,E},
     {A,WALL,B,F},

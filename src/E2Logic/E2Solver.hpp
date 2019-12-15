@@ -4,13 +4,13 @@
 //  Copyright © 2009-2019 Yohan Firmy
 //
 
-#ifndef E2Solver_h
-#define E2Solver_h
+#ifndef E2Solver_hpp
+#define E2Solver_hpp
 
 #include <iostream>
-#include "E2Init.h"
-#include "E2Job.h"
-#include "E2Trace.h"
+#include "E2Init.hpp"
+#include "E2Job.hpp"
+#include "E2Trace.hpp"
 
 class E2Solver {
 
@@ -33,4 +33,4 @@ private:
     void cleanUp();
 };
 
-#endif // E2Solver_h
+#endif // E2Solver_hpp

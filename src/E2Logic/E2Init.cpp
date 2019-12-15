@@ -7,10 +7,10 @@
 #include <iostream>
 #include <vector>
 
-#include "E2Init.h"
+#include "E2Init.hpp"
 #include "E2Model/E2Types.h"
 #include "E2Model/E2Model.h"
-#include "E2Logger.h"
+#include "E2Logger.hpp"
 #include "E2Size.h"
 
 Position Board[BORDER_SIZE+2][BORDER_SIZE+2];
@@ -18,6 +18,7 @@ Position* Path[BORDER_SIZE*BORDER_SIZE];
 OrientedPiece* PiecesOrientees[NB_ORIENTED_PIECES];
 std::vector<OrientedPiece*>* Index[NB_COLORS+1][NB_COLORS+1][NB_COLORS+1][NB_COLORS+1];
 extern Piece Bag[BORDER_SIZE*BORDER_SIZE];
+extern PuzzlePiece BagInitializer[BORDER_SIZE*BORDER_SIZE];
 
 Position* goNorth( Position* start , int count, Position** outpath )
 {
@@ -142,6 +143,13 @@ void buildWallAt( Position* p )
 void Initialisation()
 {
 	debug( "Initialisation" );
+
+    // Initializing Bag
+    for( short i=0; i<BORDER_SIZE*BORDER_SIZE; i++)
+	{
+		PuzzlePiece p = BagInitializer[i];
+		Bag[i] = { p.C1, p.C2, p.C3, p.C4, i, true };
+	}
 
 	// Board inner links
 	for( int i=0; i<=BORDER_SIZE+1; i++)

@@ -25,5 +25,6 @@ extern std::vector<OrientedPiece*>* Index[NB_COLORS+1][NB_COLORS+1][NB_COLORS+1]
 
 extern Piece Bag[BORDER_SIZE*BORDER_SIZE];
 
+extern PuzzlePiece BagInitializer[BORDER_SIZE*BORDER_SIZE];
 
 #endif // E2Model_h

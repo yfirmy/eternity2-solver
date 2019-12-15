@@ -3,3 +3,5 @@
 ./obj
 ./README
 ./web
+./puller
+*.j2
