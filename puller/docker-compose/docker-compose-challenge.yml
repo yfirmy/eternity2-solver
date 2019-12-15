@@ -1,0 +1,15 @@
+version: '3.7'
+
+services:
+   puller:
+     image: yfirmy/eternity2-puller-challenge:1.7.1
+     environment:
+       - ETERNITY2_SERVER_PUZZLE_PASSWORD_FILE=/run/secrets/server_puzzle_password
+       - ETERNITY2_SOLVER_MACHINE_TYPE="docker-local-machine"
+       - ETERNITY2_SOLVER_CLUSTER_NAME="no-cluster"
+     secrets:
+       - server_puzzle_password
+
+secrets:
+   server_puzzle_password:
+     file: ../secrets/challenge_password

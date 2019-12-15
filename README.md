@@ -6,46 +6,47 @@ A simple backtracker solver, to solve the ["Eternity II" puzzle challenge](https
 
 This is a mono-thread tree exploration, through the Eternity II solutions space, written in C++.
 
-The wrapper scripts, and the unit tests, are written in Python.
+It is containerized in Docker Images to achieve massive parallelism in a cluster.
 
-Two exploration strategies are implemented, and compiled in two different binaries:
- - ["Depth-First Search"](https://en.wikipedia.org/wiki/Depth-first_search) (DFS): default strategy to search for the deepest leaf through the tree
- - ["Breadth-First Search"](https://en.wikipedia.org/wiki/Breadth-first_search) (BFS): intended to be used to ["divide the problem"](https://en.wikipedia.org/wiki/Divide-and-conquer_algorithm) in smaller sub-problems, via the REST API.
+The solver core application is embedded in 2 kinds of Docker Images.
 
-## Design goals
+The two kinds of Docker Images are :
+ - **eternity2-puller** : a daemon script, pulling Jobs from the ["Eternity II Server"](https://github.com/yfirmy/eternity2-server) and delegating its solving to the embedded solver core process (in a ["Depth-First Search"](https://en.wikipedia.org/wiki/Depth-first_search) mode).
+ - **eternity2-backend** : a REST API server, wrapping the solver core process (in a ["Breadth-First Search"](https://en.wikipedia.org/wiki/Breadth-first_search) mode), and intended to be used server-side by the ["Eternity II Server"](https://github.com/yfirmy/eternity2-server) in order to create new branches in the search tree. 
 
-The **DFS solver** is designed to be very simple and portable, to be executed in parrallel, and orchestrated externally.
-The goal will be to achieve a massive parallelization of this "DFS solver" on a cloud via containers scalability.
+## Architecture of the Solver Cluster
 
-The **BFS solver** is very similar, and designed to be used via its REST API, by the [Eternity II Server](https://github.com/yfirmy/eternity2-server), to gradually divide the search space, in order to dispatch the workload between workers.
+A Eternity II cluster is composed of:
+ - One ["Eternity II Server"](https://github.com/yfirmy/eternity2-server)
+ - Multiple ["Eternity II Solvers"](https://github.com/yfirmy/eternity2-solver) being clients of the server.
 
-## The Wrapper scripts
+The ["Eternity II Server"](https://github.com/yfirmy/eternity2-erver) is dedicated:
+ - to divide the search space, in branches, 
+ - to provide Jobs to solve to multiple solvers (clients will request new jobs).
+ - to store jobs results returned by the different solvers
 
-In order to make theses solvers interact with the [Eternity II Server](https://github.com/yfirmy/eternity2-server), two scripts are available:
-
- - A **REST API Script** is exposing the **BFS Solver** as a web service (called by the [Eternity II Server](https://github.com/yfirmy/eternity2-server))
- - A **Job Puller Script** is pulling jobs to solve (calling the [Eternity II Server](https://github.com/yfirmy/eternity2-server)) and providing them to the **DFS Solver** via command line.
+The ["Eternity II Solver"](https://github.com/yfirmy/eternity2-erver) is dedicated :
+ - to ask the server for new Jobs to solve
+ - to actually solve the given Job
+ - to give results (empty or not) for the given job
+ - to ask for another job (and so on)
 
 ## History
 
- - 2009 : first versions "E2Breaker" : Multi-thread Windows Client/Server application (up to 14 clients in parallel)
+ - 2009 : first versions called "E2Breaker" : Multi-thread Windows Client/Server application (up to 14 clients in parallel)
  - 2018 : rebirth of the project: refactoring to a simple Monothread Linux application (no more threading, no more winsock) 
- - 2019/02 : improvements for publishing on GitHub : added non-regression tests, added "Clue 1" solving, added GNU license
- - 2019/08 : added "Breadth-First Search" strategy, and a REST API for it.
- - 2019/10 : added a "Job Puller Script", to request Jobs from the [Eternity II server](https://github.com/yfirmy/eternity2-server), and to solve locally.
+ - 2019/02 : publishing the core solver on GitHub : added non-regression tests, added "Clue 1" solving, added GNU license
+ - 2019/08 : added the Job Puller script (solving on the client-side), and a REST API script (branching on the server-side).
+ - 2019/10 : containers both the "Puller Script", and the "REST API", in 2 different Docker images (with a solver embedded)
+ - 2019/12 : running the cluster in a Kubernetes Cluster
 
 ## Build the project
 
-Please use the Makefile.
+Please use the build.sh script (multistage Docker build)
 
-- No dependency for the C++ Solver Core
-- Python for the "Wrapper Scripts" and Tests
+## The solver core application
 
-## Compatibility
-
-The "Wrapper Scripts" are compatible with [Eternity II server](https://github.com/yfirmy/eternity2-server) **version 1.2.1**
-
-## Input and Outputs
+### Input and Outputs
 
 This solver is interactive : it will read its new job, on the standard input, and will read again once finished.
 
@@ -56,7 +57,7 @@ This solver will read an initial state, from which to start exploration, and wil
 
 The initial state, can be an empty puzzle board, for a full tree exploration, or a partially filled board, for partial branches exploration.
 
-## Board description format for Input and Output
+### Board description format for Input and Output
 
 Beginning character `$`
 For each position (from left to rigth, from top to bottom):
@@ -74,11 +75,10 @@ Examples for a small 4x4 puzzle board:
  $2W:24E:.:.:.:.:.:.:.:.:.:.:.:.:.:.:;
  ```
 
- ## REST API for the Breadth-First Search
+## The Solver as a Server-side Backend
 
-To enable the HTTP REST API, execute the following python script:
-```
-python web/eternity2-solver-http.py --conf web/conf/puzzle.ini
+### REST API for the Breadth-First Search
+
 ```
 
  | GET | PUT | DELETE | POST | Path                                    | Description                             |

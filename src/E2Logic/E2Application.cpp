@@ -11,7 +11,7 @@
 #include "E2Logger.h"
 #include "E2Size.h"
 
-#define VERSION "1.7.1"
+#define VERSION "1.7.2"
 
 Application::Application(std::string name, std::string defaultInitialJob) : _name(name), _defaultInitialJob(defaultInitialJob) {
 }

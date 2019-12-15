@@ -1,6 +1,6 @@
 #!/bin/sh
 
-SOLVER_VERSION=1.7.1
+SOLVER_VERSION=1.7.2
 IMAGE_BINARIES=yfirmy/eternity2-solver-binaries
 
 echo Building $IMAGE_BINARIES:$SOLVER_VERSION

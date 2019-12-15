@@ -28,7 +28,7 @@ class SolverInfo:
   
   def __init__(self, config, solver):
       self.name = config.get('Solver', 'name')
-      self.version = "1.7.0"
+      self.version = "1.7.2"
       self.machineType = config.get('Solver', 'machine.type')
       self.clusterName = config.get('Solver', 'cluster.name')
       self.capacity, self.score = solver.check_solver_capacity()
@@ -65,10 +65,12 @@ class E2SolverWrapper:
 
       foundResults = []
       resultsCount = 0
+      returncode = process.poll()
 
-      while resultsCount < self.resultsLimit:
+      while returncode is None and resultsCount < self.resultsLimit:
         output = process.stdout.readline()
-        if output == '' and process.poll() is not None:
+        returncode = process.poll()
+        if output == '' and returncode is not None:
           break
         if output:
           line = output.decode('utf-8')
@@ -78,6 +80,9 @@ class E2SolverWrapper:
                 submitter(job, foundResults, solverInfo)
              resultsCount = resultsCount + len(foundResults)
              del foundResults[:]
+
+      if returncode is not None:
+        process.terminate()
 
       if resultsCount < self.resultsLimit and len(foundResults) > 0:
         if submitter is not None:

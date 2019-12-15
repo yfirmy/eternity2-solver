@@ -1,0 +1,15 @@
+version: '3.7'
+
+services:
+   puller:
+     image: yfirmy/eternity2-puller-sample:1.7.2
+     environment:
+       - ETERNITY2_SERVER_SAMPLE_PASSWORD_FILE=/run/secrets/server_sample_password
+       - ETERNITY2_SOLVER_MACHINE_TYPE="docker-local-machine"
+       - ETERNITY2_SOLVER_CLUSTER_NAME="no-cluster"
+     secrets:
+       - server_sample_password
+
+secrets:
+   server_sample_password:
+     file: ../secrets/sample_password
