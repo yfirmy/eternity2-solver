@@ -20,12 +20,12 @@ A Eternity II cluster is composed of:
  - One ["Eternity II Server"](https://github.com/yfirmy/eternity2-server)
  - Multiple ["Eternity II Solvers"](https://github.com/yfirmy/eternity2-solver) being clients of the server.
 
-The ["Eternity II Server"](https://github.com/yfirmy/eternity2-erver) is dedicated:
+The ["Eternity II Server"](https://github.com/yfirmy/eternity2-server) is dedicated:
  - to divide the search space, in branches, 
  - to provide Jobs to solve to multiple solvers (clients will request new jobs).
  - to store jobs results returned by the different solvers
 
-The ["Eternity II Solver"](https://github.com/yfirmy/eternity2-erver) is dedicated :
+The ["Eternity II Solver"](https://github.com/yfirmy/eternity2-solver) is dedicated :
  - to ask the server for new Jobs to solve
  - to actually solve the given Job
  - to give results (empty or not) for the given job
