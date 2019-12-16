@@ -9,8 +9,8 @@ IMAGE_PULLER_CLUE1=yfirmy/eternity2-puller-clue1
 IMAGE_PULLER_CHALLENGE=yfirmy/eternity2-puller-challenge
 
 IMAGE_BACKEND_SAMPLE=yfirmy/eternity2-backend-sample
-IMAGE_BACKEND_CLUE1=yfirmy/eternity2-puller-clue1
-IMAGE_BACKEND_CHALLENGE=yfirmy/eternity2-puller-challenge
+IMAGE_BACKEND_CLUE1=yfirmy/eternity2-backend-clue1
+IMAGE_BACKEND_CHALLENGE=yfirmy/eternity2-backend-challenge
 
 IMAGES_PULLER=($IMAGE_PULLER_SAMPLE $IMAGE_PULLER_CLUE1 $IMAGE_PULLER_CHALLENGE)
 IMAGES_BACKEND=($IMAGE_BACKEND_SAMPLE $IMAGE_BACKEND_CLUE1 $IMAGE_BACKEND_CHALLENGE)

@@ -28,7 +28,7 @@ class SolverInfo:
   
   def __init__(self, config, solver):
       self.name = config.get('Solver', 'name')
-      self.version = "1.7.2"
+      self.version = "1.7.4"
       self.machineType = config.get('Solver', 'machine.type')
       self.clusterName = config.get('Solver', 'cluster.name')
       self.capacity, self.score = solver.check_solver_capacity()
@@ -65,35 +65,36 @@ class E2SolverWrapper:
 
       foundResults = []
       resultsCount = 0
+      output = process.stdout.readline()
       returncode = process.poll()
 
-      while returncode is None and resultsCount < self.resultsLimit:
+      while output is not None and returncode is None and resultsCount < self.resultsLimit:
+
+        if len(output.strip()) > 0:
+          self.process_line( output.decode('utf-8').strip(), foundResults)
+
+        if len(foundResults) >= self.resultsChunkSize:
+          if submitter is not None:
+            submitter(job, foundResults, solverInfo)
+          resultsCount = resultsCount + len(foundResults)
+          del foundResults[:]
+
         output = process.stdout.readline()
         returncode = process.poll()
-        if output == '' and returncode is not None:
-          break
-        if output:
-          line = output.decode('utf-8')
-          self.process_line(line, foundResults)
-          if len(foundResults) >= self.resultsChunkSize:
-             if submitter is not None:
-                submitter(job, foundResults, solverInfo)
-             resultsCount = resultsCount + len(foundResults)
-             del foundResults[:]
 
       if returncode is not None:
         process.terminate()
 
-      if resultsCount < self.resultsLimit and len(foundResults) > 0:
-        if submitter is not None:
-           submitter(job, foundResults, solverInfo)
-        resultsCount = resultsCount + len(foundResults)
+      if submitter is not None:
+        submitter(job, foundResults, solverInfo)
+
+      resultsCount = resultsCount + len(foundResults)
       del foundResults[:]
       
       return resultsCount
 
   def process_line(self, line, foundResults):
-      logging.debug(line)
+      logging.debug('Solver output: [' + line + ']')
       if(line.startswith(self.nextResultLinePattern)):
         solution = re.sub(self.resultLinePattern, r"\1", line)
         foundResults.append(Result(solution.rstrip(), now()))
