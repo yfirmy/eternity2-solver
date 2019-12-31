@@ -31,14 +31,14 @@ The ["Eternity II Solver"](https://github.com/yfirmy/eternity2-solver) is dedica
  - to give results (empty or not) for the given job
  - to ask for another job (and so on)
 
-## History
+## History/Milestones
 
- - 2009 : first versions called "E2Breaker" : Multi-thread Windows Client/Server application (up to 14 clients in parallel)
+ - 2009 : first versions called "E2Breaker" : Multi-thread Windows Client/Server application (up to 14 solvers/clients in parallel)
  - 2018 : rebirth of the project: refactoring to a simple Monothread Linux application (no more threading, no more winsock) 
  - 2019/02 : publishing the core solver on GitHub : added non-regression tests, added "Clue 1" solving, added GNU license
  - 2019/08 : added the Job Puller script (solving on the client-side), and a REST API script (branching on the server-side).
- - 2019/10 : containers both the "Puller Script", and the "REST API", in 2 different Docker images (with a solver embedded)
- - 2019/12 : running the cluster in a Kubernetes Cluster
+ - 2019/10 : containerize the "Puller Script" and the "REST API" in 2 different Docker images (with a solver embedded)
+ - 2019/12 : running 198 solvers in parallel (as containers) in a Kubernetes Cluster (Amazon AWS EKS) (spread across 100 virtual machines)
 
 ## Build the project
 
