@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
    puller:
-     image: yfirmy/eternity2-puller-clue1:1.7.6
+     image: yfirmy/eternity2-puller-clue1:1.8.0
      environment:
        - ETERNITY2_SERVER_URL=https://lab.firmy.fr
        - ETERNITY2_SERVER_CLUE1_PASSWORD_FILE=/run/secrets/server_clue1_password

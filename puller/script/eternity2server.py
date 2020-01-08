@@ -11,6 +11,7 @@ import requests
 import configparser
 import logging
 import json
+from eternity2model import SolverStatus
 from eternity2utils import *
 
 class E2ServerWrapper:
@@ -23,6 +24,7 @@ class E2ServerWrapper:
       self.url_jobs = self.basepath + api_path + "jobs?size={}"
       self.url_result = self.basepath + api_path + "result"
       self.url_status = self.basepath + api_path + "status"
+      self.url_event = self.basepath + api_path + "event"
       self.url_health = self.basepath + "health"
 
   def read_password(self, config):
@@ -69,8 +71,12 @@ class E2ServerWrapper:
         logging.info("Releasing lock for job {}".format(job))
         self.http_put( self.url_status, self.buildGiveUpPayload(job, solverInfo) )
 
+  def postEvent(self, solverName, status):
+      self.http_post( self.url_event, self.buildEventPayload(solverName, status) )
+
   def submit(self, job, results, solverInfo):
       logging.info("Submitting {} results for job {}".format(len(results), job))
+      self.postEvent( solverInfo.name, SolverStatus.REPORTING )
       self.http_post( self.url_result, self.buildResultsPayload(job, results, solverInfo) )
 
   def buildResultsPayload(self, job, results, solverInfo):
@@ -87,6 +93,10 @@ class E2ServerWrapper:
 
   def buildGiveUpPayload(self, job, solverInfo):
       body = {"solver": {"name": solverInfo.name, "version": solverInfo.version, "machineType": solverInfo.machineType, "clusterName": solverInfo.clusterName, "score": solverInfo.score}, "job": job, "status": "GO", "dateJobTransmission": "", "dateStatusUpdate": now()}
+      return json.dumps(body)
+
+  def buildEventPayload(self, solverName, status):
+      body = {"solverName": solverName, "status": status.name}
       return json.dumps(body)
 
   def check_health(self):

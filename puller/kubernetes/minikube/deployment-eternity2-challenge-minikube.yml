@@ -18,7 +18,7 @@ spec:
         app: eternity2-puller-challenge
     spec:
       containers:
-      - image: yfirmy/eternity2-puller-challenge:1.7.6
+      - image: yfirmy/eternity2-puller-challenge:1.8.0
         name: eternity2-puller-challenge
         imagePullPolicy: Always
         env:
