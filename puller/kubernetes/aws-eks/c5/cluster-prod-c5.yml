@@ -1,0 +1,16 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: e2-aws-prod-c5
+  region: us-east-2
+
+nodeGroups:
+  - name: ng1
+    labels:
+      instance-type: c5.24xlarge
+    instanceType: c5.24xlarge
+    desiredCapacity: 1
+    privateNetworking: true
+    minSize: 0
+    maxSize: 2

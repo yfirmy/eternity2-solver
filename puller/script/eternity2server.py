@@ -64,6 +64,11 @@ class E2ServerWrapper:
       logging.info("Acquiring lock for job {}".format(job))
       self.http_put( self.url_status, self.buildLockPayload(job, retrievalDate, solverInfo) )
 
+  def giveup(self, job, solverInfo):
+      if job is not None:
+        logging.info("Releasing lock for job {}".format(job))
+        self.http_put( self.url_status, self.buildGiveUpPayload(job, solverInfo) )
+
   def submit(self, job, results, solverInfo):
       logging.info("Submitting {} results for job {}".format(len(results), job))
       self.http_post( self.url_result, self.buildResultsPayload(job, results, solverInfo) )
@@ -78,6 +83,10 @@ class E2ServerWrapper:
 
   def buildLockPayload(self, job, retrievalDate, solverInfo):
       body = {"solver": {"name": solverInfo.name, "version": solverInfo.version, "machineType": solverInfo.machineType, "clusterName": solverInfo.clusterName, "score": solverInfo.score}, "job": job, "status": "PENDING", "dateJobTransmission": retrievalDate, "dateStatusUpdate": now()}
+      return json.dumps(body)
+
+  def buildGiveUpPayload(self, job, solverInfo):
+      body = {"solver": {"name": solverInfo.name, "version": solverInfo.version, "machineType": solverInfo.machineType, "clusterName": solverInfo.clusterName, "score": solverInfo.score}, "job": job, "status": "GO", "dateJobTransmission": "", "dateStatusUpdate": now()}
       return json.dumps(body)
 
   def check_health(self):

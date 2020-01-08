@@ -2,12 +2,13 @@ version: '3.7'
 
 services:
    puller:
-     image: yfirmy/eternity2-puller-clue1:1.7.4
+     image: yfirmy/eternity2-puller-clue1:1.7.6
      environment:
        - ETERNITY2_SERVER_URL=https://lab.firmy.fr
        - ETERNITY2_SERVER_CLUE1_PASSWORD_FILE=/run/secrets/server_clue1_password
        - ETERNITY2_SOLVER_MACHINE_TYPE="docker-local-machine"
        - ETERNITY2_SOLVER_CLUSTER_NAME="no-cluster"
+       - ETERNITY2_SOLVER_JOB_CAPACITY=34
      secrets:
        - server_clue1_password
 

@@ -17,7 +17,7 @@ class SolverResult:
 class SolverInfo:
   def __init__(self, config, solver):
       self.name = config.get('Solver', 'name')
-      self.version = "1.7.5"
+      self.version = "1.7.6"
       self.machineType = config.get('Solver', 'machine.type')
       self.clusterName = config.get('Solver', 'cluster.name')
       self.capacity, self.score = solver.check_solver_capacity()

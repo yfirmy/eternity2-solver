@@ -87,23 +87,7 @@ class E2SolverWrapper:
     self.solve(self.evaluationJob, None, None)
     delay = time.time() - starttime
     logging.info('This solver can solve the reference job in '+str(delay)+' seconds (reference time is '+str(self.referenceTime)+' sec)')
-    if delay < ( self.referenceTime / 2 ) :
-      category = 'much faster'
-      jobCapacity = self.defaultJobCapacity + 2
-    if delay < ( self.referenceTime - 2 ) :
-      category = 'faster'
-      jobCapacity = self.defaultJobCapacity + 1
-    if delay >= ( self.referenceTime - 2 ) and delay <= ( self.referenceTime + 2 ):
-      category = 'reference'
-      jobCapacity = self.defaultJobCapacity
-    if delay > ( self.referenceTime + 2 ):
-      category = 'slower'
-      jobCapacity = self.defaultJobCapacity - 1
-    if delay > ( self.referenceTime * 2 ):
-      category = 'much slower'
-      jobCapacity = self.defaultJobCapacity - 2
-    logging.info('This solver speed class: '+category)
-    logging.info('Solver job capacity: '+str(jobCapacity))
+    jobCapacity = self.defaultJobCapacity
     return jobCapacity, ( delay / self.referenceTime )
 
   def solve(self, job, submitter, solverInfo):

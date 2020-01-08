@@ -33,6 +33,7 @@ class Application:
       self.info = SolverInfo(self.config, self.solver)
       self.interruption_requested = False
       self.retryCount = 0
+      self.currentJob = None
 
   def main(self):
 
@@ -46,7 +47,9 @@ class Application:
               for job in jobs:
                   try:
                       self.server.lock( job, retrievalDate, self.info )
+                      self.currentJob = job
                       self.solver.solve( job, self.server.submit, self.info )
+                      self.currentJob = None
                       self.retryCount = 0
                       break
                   except requests.exceptions.HTTPError as e:
@@ -67,9 +70,13 @@ class Application:
   def interrupted(self):
       return self.interruption_requested
 
+  def giveup_current_job(self):
+      self.server.giveup( self.currentJob, self.info )
+
   def request_interruption(self):
       logging.warning("Interruption requested")
       self.interruption_requested = True
+      self.giveup_current_job()
 
 def receiveSignal(signalNumber, frame):
     logging.warning('Received: {}'.format(signalNumber))
