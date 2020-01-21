@@ -27,4 +27,6 @@ extern Piece Bag[BORDER_SIZE*BORDER_SIZE];
 
 extern PuzzlePiece BagInitializer[BORDER_SIZE*BORDER_SIZE];
 
+extern OrientedPiece* Empty;
+
 #endif // E2Model_h

@@ -56,7 +56,7 @@ std::string* E2Job::boardToString()
         {
             OrientedPiece* pp = Board[i][j].Here;
             
-            if(pp && pp->Origin) { ss << pp->Origin->id << traceDirection(pp->Orientation) << ":"; }
+            if(pp && (pp != Empty) && pp->Origin) { ss << pp->Origin->id << traceDirection(pp->Orientation) << ":"; }
             else { ss << ".:"; }
         }
     }
@@ -73,8 +73,8 @@ std::pair<Position**, int> E2Job::findStartingPositionFromPath()
 
     while(!found && i<BORDER_SIZE*BORDER_SIZE)
     {
-        if( Path[i]->Here == NULL ) {
-            if( i==0 || Path[i-1]->Here != NULL ) {
+        if( Path[i]->Here == Empty ) {
+            if( i==0 || Path[i-1]->Here != Empty ) {
                 result= (Path+i); found=true;
             }
         }
@@ -93,8 +93,8 @@ Position** E2Job::findLastPositionFromPath()
 	
     while(!found && i>=0)
     {
-        if( Path[i]->Here == NULL ) {
-            if( i==BORDER_SIZE*BORDER_SIZE-1 || Path[i+1]->Here != NULL ) {
+        if( Path[i]->Here == Empty ) {
+            if( i==BORDER_SIZE*BORDER_SIZE-1 || Path[i+1]->Here != Empty ) {
                 //result= (Path+i); 
                 found=true;
             }

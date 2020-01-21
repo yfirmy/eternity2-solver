@@ -11,23 +11,16 @@
 
 #include <vector>
 
-int Joker = NB_COLORS;
-int level;
-int highscore;
-
 E2Solver::E2Solver() {
     Initialisation();
     Indexation();
     this->hitCount = 0;
-    level=0;
-    highscore=0;
 };
 
 int E2Solver::solve(std::string job) {
     E2Job* myJob = new E2Job( job );
     Position** pos = myJob->GetStartingPosition();
     this->lastPosition = myJob->GetLastPosition();
-    level = myJob->GetStartingLevel();
     Explore(pos);
     int result = this->hitCount;
     this->cleanUp();
@@ -41,17 +34,6 @@ int E2Solver::getSolutionCount() {
 void E2Solver::cleanUp() {
     Reinitialisation();
     this->hitCount = 0;
-    level=0;
-    highscore=0;
-}
-
-void E2Solver::claimNewScore(int* lvl, int* highlvl)
-{
-    if( *lvl > *highlvl )
-    {
-        debug( "New score " + std::to_string( *lvl ) + " : " + *(E2Job::boardToString()) );
-        *highlvl = *lvl;
-    }
 }
 
 void E2Solver::printCurrentState() {
@@ -69,26 +51,17 @@ void E2Solver::printCurrentState() {
 bool E2Solver::Explore(Position** pposition)
 {
     bool result = false;
-    level++;
     
     Position* position = *(pposition);
     
-    OrientedPiece* west = position->West->Here;
-    OrientedPiece* east = position->East->Here;
-    OrientedPiece* north = position->North->Here;
-    OrientedPiece* south = position->South->Here;
-    
-    short constraintWest = west ? west->East : Joker;
-    short constraintNorth = north ? north->South : Joker;
-    short constraintEast = east ? east->West : Joker;
-    short constraintSouth = south ? south->North : Joker;
-    
+    short constraintWest = position->West->Here->East;
+    short constraintNorth = position->North->Here->South;
+    short constraintEast = position->East->Here->West;
+    short constraintSouth = position->South->Here->North;
+
     std::vector<OrientedPiece*>* PossiblePieces = Index[constraintWest][constraintNorth][constraintEast][constraintSouth];
-    //std::vector<OrientedPiece*>::iterator it;
-    std::vector<OrientedPiece*>::reverse_iterator it;
     
-    //for( it=PossiblePieces->begin(); it!=PossiblePieces->end(); it++)
-    for( it=PossiblePieces->rbegin(); it!=PossiblePieces->rend(); it++)
+    for( OrientedPiece** it = PossiblePieces->data(); it != PossiblePieces->data() + PossiblePieces->size(); it++ )
     {
         OrientedPiece* candidate = *it;
         
@@ -96,8 +69,6 @@ bool E2Solver::Explore(Position** pposition)
         {
             candidate->Origin->available = false;
             position->Here = candidate;
-            
-            //this->claimNewScore(&level, &highscore);
             
 #ifdef DEPTH_FIRST_SEARCH
             if( pposition!=this->lastPosition ) {
@@ -118,10 +89,9 @@ bool E2Solver::Explore(Position** pposition)
 
             // free the piece
             candidate->Origin->available = true;
-            position->Here = NULL;
+            position->Here = Empty;
         }
     }
     
-    level--;
     return result;
 }

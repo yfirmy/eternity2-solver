@@ -7,7 +7,7 @@
 #ifndef E2TYPES
 #define E2TYPES
 
-enum Color {WALL,A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V};
+enum Color {WALL,A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,UNDEFINED};
 enum Direction {NORTH, WEST, EAST, SOUTH};
 
 #define NB_COLORS 23

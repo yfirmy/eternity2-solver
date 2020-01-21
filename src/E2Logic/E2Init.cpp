@@ -19,6 +19,7 @@ OrientedPiece* PiecesOrientees[NB_ORIENTED_PIECES];
 std::vector<OrientedPiece*>* Index[NB_COLORS+1][NB_COLORS+1][NB_COLORS+1][NB_COLORS+1];
 extern Piece Bag[BORDER_SIZE*BORDER_SIZE];
 extern PuzzlePiece BagInitializer[BORDER_SIZE*BORDER_SIZE];
+OrientedPiece* Empty;
 
 Position* goNorth( Position* start , int count, Position** outpath )
 {
@@ -140,9 +141,22 @@ void buildWallAt( Position* p )
 	p->Here = pp;
 }
 
+void buidEmptyPiece() 
+{
+	Empty = (OrientedPiece*)malloc( sizeof(OrientedPiece) );
+	Empty->West = UNDEFINED;
+	Empty->North = UNDEFINED;
+	Empty->East = UNDEFINED;
+	Empty->South = UNDEFINED;
+	Empty->Origin = NULL;
+}
+
 void Initialisation()
 {
 	debug( "Initialisation" );
+
+    // Initializing the common "Empty Piece"
+    buidEmptyPiece();
 
     // Initializing Bag
     for( short i=0; i<BORDER_SIZE*BORDER_SIZE; i++)
@@ -166,7 +180,7 @@ void Initialisation()
 			p->x = i;
 			p->y = j;
 
-			p->Here		= NULL;
+			p->Here		= Empty;
 		}
 	}
 
@@ -184,10 +198,10 @@ void Reinitialisation()
 	for(int i=1; i<(BORDER_SIZE+1); i++) {
 		for(int j=1; j<(BORDER_SIZE+1); j++) {
 			Position* p = &(Board[i][j]);
-			if ( p->Here!=NULL ) {
+			if ( p->Here != Empty ) {
 				p->Here->Origin->available=true;
 			}
-			p->Here = NULL;
+			p->Here = Empty;
 		}
 	}
     // Path already ok
