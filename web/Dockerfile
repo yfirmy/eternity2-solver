@@ -4,7 +4,7 @@ ARG exposed_port=5000
 
 # --- runtime image ---
 
-FROM python:3.5.8-alpine3.10
+FROM python:3.8.1-alpine3.10
 ARG binary
 ARG configuration
 ARG exposed_port

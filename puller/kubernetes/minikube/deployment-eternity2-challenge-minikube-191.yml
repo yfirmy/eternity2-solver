@@ -3,27 +3,27 @@ kind: Deployment
 metadata:
   creationTimestamp: null
   labels:
-    app: eternity2-puller-challenge
-  name: eternity2-puller-challenge
+    app: eternity2-puller-challenge-191
+  name: eternity2-puller-challenge-191
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
-      app: eternity2-puller-challenge
+      app: eternity2-puller-challenge-191
   strategy: {}
   template:
     metadata:
       creationTimestamp: null
       labels:
-        app: eternity2-puller-challenge
+        app: eternity2-puller-challenge-191
     spec:
       containers:
-      - image: yfirmy/eternity2-puller-challenge:1.8.0
+      - image: yfirmy/eternity2-puller-challenge:2.0.0
         name: eternity2-puller-challenge
         imagePullPolicy: Always
         env:
         - name: ETERNITY2_SERVER_URL
-          value: "http://192.168.1.91:8080"
+          value: "https://lab.firmy.fr"
         - name: ETERNITY2_SERVER_PUZZLE_PASSWORD_FILE
           value: "/app/eternity2-solver/secrets/eternity2_server_password"
         - name: ETERNITY2_SOLVER_MACHINE_TYPE
@@ -31,7 +31,7 @@ spec:
         - name: ETERNITY2_SOLVER_CLUSTER_NAME
           value: "minikube"
         - name: ETERNITY2_SOLVER_JOB_CAPACITY
-          value: "189"
+          value: "191"
         volumeMounts:
         - name: password
           mountPath: "/app/eternity2-solver/secrets"
