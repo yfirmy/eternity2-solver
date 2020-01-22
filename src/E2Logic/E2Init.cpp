@@ -1,7 +1,7 @@
 //
 //  Eternity II Solver Initialization Utils 
 //
-//  Copyright © 2009-2019 Yohan Firmy
+//  Copyright © 2009-2020 Yohan Firmy
 //
 
 #include <iostream>
@@ -15,6 +15,7 @@
 
 Position Board[BORDER_SIZE+2][BORDER_SIZE+2];
 Position* Path[BORDER_SIZE*BORDER_SIZE];
+Step Stack[BORDER_SIZE*BORDER_SIZE];
 OrientedPiece* PiecesOrientees[NB_ORIENTED_PIECES];
 std::vector<OrientedPiece*>* Index[NB_COLORS+1][NB_COLORS+1][NB_COLORS+1][NB_COLORS+1];
 extern Piece Bag[BORDER_SIZE*BORDER_SIZE];
@@ -116,17 +117,17 @@ void fillPath()
 			goToLast( p, buffer );
 		}
 	}
-
-	//debugPath();
 }
 
-void debugPath()
+void fillStack()
 {
-	std::cout << "== debug Path ==" << std::endl;
+	fillPath();
 
-	for(int i=0; i< (BORDER_SIZE*BORDER_SIZE) ; i++)
-	{
-		std::cout << "["<< i << "] => (" << Path[i]->x << ", " << Path[i]->y << ")" << std::endl;
+	for( short i=0; i<BORDER_SIZE*BORDER_SIZE; i++ ) {
+		Stack[i].level = (i+1);
+		Stack[i].position = Path[i];
+		Stack[i].firstCandidate = &Empty;
+		Stack[i].lastCandidate = &Empty;
 	}
 }
 
@@ -189,7 +190,8 @@ void Initialisation()
 	for(int i=0; i<BORDER_SIZE+2; i++) buildWallAt( &(Board[BORDER_SIZE+1][i]) );
 	for(int i=0; i<BORDER_SIZE+2; i++) buildWallAt( &(Board[i][BORDER_SIZE+1]) );
 
-	fillPath();
+	//fillPath();
+	fillStack();
 }
 
 void Reinitialisation() 
@@ -210,6 +212,12 @@ void Reinitialisation()
 	for(int i=0; i<BORDER_SIZE*BORDER_SIZE; i++) {
 		Piece* p = Bag+i;
 		p->available = true;
+	}
+
+	// Stack reinit
+	for( int i=0; i<BORDER_SIZE*BORDER_SIZE; i++ ) {
+		Stack[i].firstCandidate = &Empty;
+		Stack[i].lastCandidate = &Empty;
 	}
 
 }
@@ -275,8 +283,6 @@ void fillPiecesOrientees()
 		PiecesOrientees[i*4+3] = pp4;
 	}
 
-	//debugBag();
-	//debugPiecesOrientees();
 }
 
 void findPiecesByConstraintsAndId( int constraintWest, int constraintNorth, int constraintEast, int constraintSouth, short constraintPieceId, OrientedPiece** result ) 

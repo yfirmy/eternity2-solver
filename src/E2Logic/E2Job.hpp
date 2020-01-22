@@ -20,20 +20,22 @@ private:
 	std::string* mJob;
 	std::string& ToString();
 	void LoadToBoard();
-    std::pair<Position**, int> findStartingPositionFromPath();
-	Position** findLastPositionFromPath();
-	Position** startingPosition;
-	Position** lastPosition;
-    int startingLevel;
+	
+	Step* findFirstStep();
+	Step* findLastStep();
+
+	Step* firstStep;
+	Step* lastStep;
 
 public:
 	E2Job();
 	E2Job(std::string& job);
 	~E2Job();
 	std::string& GetString() { return *(this->mJob); }
-	Position** GetStartingPosition() { return this->startingPosition; };
-	Position** GetLastPosition(){ return this->lastPosition; }
-    int GetStartingLevel() { return this->startingLevel; };
+
+	Step* GetFirstStep() { return this->firstStep; }
+	Step* GetLastStep() { return this->lastStep; }
+
     static std::string* boardToString();
 };
 

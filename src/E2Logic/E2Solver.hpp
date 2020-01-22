@@ -15,7 +15,8 @@
 class E2Solver {
 
 private:
-    Position** lastPosition;
+    Step* firstStep; 
+    Step* lastStep;
 
     // solutions count (for Depth First Search)
     // children count (for Breadth First Search) 
@@ -27,8 +28,8 @@ public:
     int getSolutionCount();
     
 private:
-    bool Explore(Position** pposition);
-    void claimNewScore(int* lvl, int* highlvl);
+    void Explore_iterative(Step* start);
+
     void printCurrentState();
     void cleanUp();
 };

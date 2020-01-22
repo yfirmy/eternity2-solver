@@ -54,4 +54,12 @@ struct PuzzlePiece
 	Color C4;
 };
 
+struct Step
+{
+	short level;
+	Position* position;
+	OrientedPiece** firstCandidate;
+	OrientedPiece** lastCandidate;
+};
+
 #endif // E2TYPES

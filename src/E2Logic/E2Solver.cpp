@@ -1,7 +1,7 @@
 //
 //  Eternity II Solver Core Logic 
 //
-//  Copyright © 2009-2019 Yohan Firmy
+//  Copyright © 2009-2020 Yohan Firmy
 //
 
 #include "E2Solver.hpp"
@@ -19,9 +19,18 @@ E2Solver::E2Solver() {
 
 int E2Solver::solve(std::string job) {
     E2Job* myJob = new E2Job( job );
-    Position** pos = myJob->GetStartingPosition();
-    this->lastPosition = myJob->GetLastPosition();
-    Explore(pos);
+    this->firstStep = myJob->GetFirstStep();
+
+#ifdef DEPTH_FIRST_SEARCH
+    this->lastStep = myJob->GetLastStep();
+#endif
+
+#ifdef BREADTH_FIRST_SEARCH
+    this->lastStep = this->firstStep;
+#endif
+
+    Explore_iterative(this->firstStep);
+
     int result = this->hitCount;
     this->cleanUp();
     return result;
@@ -48,50 +57,85 @@ void E2Solver::printCurrentState() {
 
 }
 
-bool E2Solver::Explore(Position** pposition)
-{
-    bool result = false;
-    
-    Position* position = *(pposition);
-    
-    short constraintWest = position->West->Here->East;
-    short constraintNorth = position->North->Here->South;
-    short constraintEast = position->East->Here->West;
-    short constraintSouth = position->South->Here->North;
+void E2Solver::Explore_iterative(Step* start) {
 
-    std::vector<OrientedPiece*>* PossiblePieces = Index[constraintWest][constraintNorth][constraintEast][constraintSouth];
+    Step* step = start;
     
-    for( OrientedPiece** it = PossiblePieces->data(); it != PossiblePieces->data() + PossiblePieces->size(); it++ )
+    while( step >= this->firstStep && step <= this->lastStep )
     {
-        OrientedPiece* candidate = *it;
-        
-        if( candidate->Origin->available )
+        if( step->firstCandidate == &Empty )
         {
-            candidate->Origin->available = false;
-            position->Here = candidate;
-            
-#ifdef DEPTH_FIRST_SEARCH
-            if( pposition!=this->lastPosition ) {
+            short constraintWest = step->position->West->Here->East;
+            short constraintNorth = step->position->North->Here->South;
+            short constraintEast = step->position->East->Here->West;
+            short constraintSouth = step->position->South->Here->North;
 
-                result = Explore( pposition+1 );
-            } 
-            else
+            std::vector<OrientedPiece*>* possiblePieces = Index[constraintWest][constraintNorth][constraintEast][constraintSouth];
+
+            if( possiblePieces->size() > 0 )
             {
-                this->hitCount++;
-                this->printCurrentState();
+                step->firstCandidate = possiblePieces->data();
+                step->lastCandidate = step->firstCandidate + possiblePieces->size() - 1;
             }
-#endif
+        }
 
-#ifdef BREADTH_FIRST_SEARCH
+        if( step->firstCandidate != &Empty && step->firstCandidate <= step->lastCandidate )
+        {
+            // for each candidate Piece
+            while( step->firstCandidate <= step->lastCandidate ) {
+                if( (*(step->firstCandidate))->Origin->available ) 
+                {
+                    // choose the first available candidate
+                    (*(step->firstCandidate))->Origin->available = false;
+                    step->position->Here = *(step->firstCandidate);
+                    break;
+                }
+                step->firstCandidate++;
+            }
+            if( step->position->Here == *(step->firstCandidate) ) {
+                // move forward
+                step->firstCandidate++;
+                step++;
+            } else {
+                // no candidate was available
+                step->firstCandidate = &Empty;
+                step->lastCandidate = &Empty;
+
+                if( step > this->firstStep ) {
+                    Step* previousStep = step - 1;
+                    previousStep->position->Here->Origin->available = true;
+                    previousStep->position->Here = Empty;
+                }
+                // move backward
+                step--;
+            }
+        }
+        else
+        {
+            // no candidate was found
+            step->firstCandidate = &Empty;
+            step->lastCandidate = &Empty;
+
+            Step* previousStep = step - 1;
+            if( step > this->firstStep ) {
+                previousStep->position->Here->Origin->available = true;
+                previousStep->position->Here = Empty;
+            }
+            // move backward
+            step--;
+        }
+
+        if( step == this->lastStep + 1 ) {
+            
+            // got ya
             this->hitCount++;
-            this->printCurrentState();   
-#endif
+            this->printCurrentState();
 
-            // free the piece
-            candidate->Origin->available = true;
-            position->Here = Empty;
+            // then move backward
+            Step* previousStep = step - 1;
+            previousStep->position->Here->Origin->available = true;
+            previousStep->position->Here = Empty;
+            step--;
         }
     }
-    
-    return result;
 }

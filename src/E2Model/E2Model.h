@@ -17,7 +17,7 @@
 
 extern Position Board[BORDER_SIZE+2][BORDER_SIZE+2];
 
-extern Position* Path[BORDER_SIZE*BORDER_SIZE];
+extern Step Stack[BORDER_SIZE*BORDER_SIZE];
 
 extern OrientedPiece* PiecesOrientees[NB_ORIENTED_PIECES];
 

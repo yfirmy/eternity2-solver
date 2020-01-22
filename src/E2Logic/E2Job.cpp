@@ -65,47 +65,40 @@ std::string* E2Job::boardToString()
     return jobString;
 }
 
-std::pair<Position**, int> E2Job::findStartingPositionFromPath()
+Step* E2Job::findFirstStep() 
 {
     bool found=false;
     int i=0;
-    Position** result = NULL;
+    Step* result = NULL;
 
     while(!found && i<BORDER_SIZE*BORDER_SIZE)
     {
-        if( Path[i]->Here == Empty ) {
-            if( i==0 || Path[i-1]->Here != Empty ) {
-                result= (Path+i); found=true;
+        if( Stack[i].position->Here == Empty ) {
+            if( i==0 || Stack[i-1].position->Here != Empty ) {
+                result= (Stack+i); found=true;
             }
         }
         i++;
     }
-    //debug("Starting position is : (" + std::to_string((*result)->x) + ", " + std::to_string((*result)->y)+ ")"); 
-    //debug("Starting level is : " + std::to_string( i-1 ) );
-    return std::make_pair(result, i-1);
+    return result;
 }
 
-Position** E2Job::findLastPositionFromPath()
+Step* E2Job::findLastStep() 
 {
     bool found=false;
     int i=BORDER_SIZE*BORDER_SIZE-1;
-    //Position** result = NULL;
 	
     while(!found && i>=0)
     {
-        if( Path[i]->Here == Empty ) {
-            if( i==BORDER_SIZE*BORDER_SIZE-1 || Path[i+1]->Here != Empty ) {
-                //result= (Path+i); 
+        if( Stack[i].position->Here == Empty ) {
+            if( i==BORDER_SIZE*BORDER_SIZE-1 || Stack[i+1].position->Here != Empty ) {
                 found=true;
             }
         }
         i--;
     }
 
-    //debug("Last position is : (" + std::to_string((*result)->x) + ", " + std::to_string((*result)->y)+ ")"); 
-    //debug("Last level is : " + std::to_string( i+1 ) );
-
-    return Path+(i+1);
+    return Stack+(i+1);
 }
 
 void E2Job::LoadToBoard()
@@ -153,10 +146,9 @@ void E2Job::LoadToBoard()
 		}
 	}
 
-    std::pair<Position**, int> pathInfo = findStartingPositionFromPath();
-    this->startingPosition = pathInfo.first ;
-    this->startingLevel = pathInfo.second;
-	this->lastPosition = findLastPositionFromPath();
+    this->firstStep = findFirstStep();
+    this->lastStep = findLastStep();
+
     //debug( "Starting at tree-level " + std::to_string( this->startingLevel ) );
 	free(constraint);
 	free(orientedPiece);
