@@ -11,6 +11,7 @@ import requests
 import configparser
 import logging
 import json
+import time
 from eternity2model import SolverStatus
 from eternity2utils import *
 
@@ -71,13 +72,36 @@ class E2ServerWrapper:
         logging.info("Releasing lock for job {}".format(job))
         self.http_put( self.url_status, self.buildGiveUpPayload(job, solverInfo) )
 
+  def tryPost( self, url, payload, what, retryCount ):
+      done = False
+      try: 
+        self.http_post( url, payload )
+        done = True
+      except requests.exceptions.HTTPError as e:
+        retryMsg = (' (retry '+ str(retryCount) +')') if ( retryCount > 0 ) else ''
+        logging.error('Impossible to submit  ' + what + retryMsg)
+        logging.error(e)
+        time.sleep(5+retryCount)
+      return done, (retryCount + 1)
+
   def postEvent(self, solverName, status):
-      self.http_post( self.url_event, self.buildEventPayload(solverName, status) )
+      done = False
+      retryCount = 0
+      payload = self.buildEventPayload(solverName, status)
+      while not done:
+        done, retryCount = self.tryPost( self.url_event, payload, 'event for ' + solverName, retryCount )
+
+  def postResults(self, job, results, solverInfo):
+      done = False
+      retryCount = 0
+      payload = self.buildResultsPayload(job, results, solverInfo)
+      while not done :
+        done, retryCount = self.tryPost( self.url_result, payload, 'results for ' + job, retryCount )
 
   def submit(self, job, results, solverInfo):
       logging.info("Submitting {} results for job {}".format(len(results), job))
       self.postEvent( solverInfo.name, SolverStatus.REPORTING )
-      self.http_post( self.url_result, self.buildResultsPayload(job, results, solverInfo) )
+      self.postResults( job, results, solverInfo )
 
   def buildResultsPayload(self, job, results, solverInfo):
       body = {"solver": {"name": solverInfo.name, "version": solverInfo.version, "machineType": solverInfo.machineType, "clusterName": solverInfo.clusterName, "score": solverInfo.score}, "job": job, "solutions": [], "dateJobTransmission": now() }
