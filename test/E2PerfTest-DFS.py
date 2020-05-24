@@ -36,7 +36,7 @@ class E2PerfTest(unittest.TestCase):
       results = self.execute_controlsample( initialboards )
       return self.parse_solutions(initialboards, results)
 
-    def execute_worker_test(self, initialboards):
+    def execute_challenge_test(self, initialboards):
       results = self.execute_worker( initialboards )
       return self.parse_solutions(initialboards, results)
 
@@ -70,11 +70,17 @@ class E2PerfTest(unittest.TestCase):
       errorMsg = str(len(foundResultsList)) + " solutions founds from job " + initialJob + "(expected "+ str(expectedSolutionCount)+" solutions)"
       self.assertEquals(expectedSolutionCount, len(foundResultsList), errorMsg)
 
-    def test_clue1_performance(self):
+    def skipped_test_clue1_performance(self):
       job1 = "$35S:27W:30S:12S:14W:33N:11S:34N:.:.:.:19N:9W:.:.:.:.:20S:10W:.:.:.:.:22S:6N:.:.:.:.:16W:25S:24S:15W:17S:21S:13S:;"
       foundSolutions = self.execute_clue1_test([job1])
       foundSolutionsList = foundSolutions[job1]
       self.assert_solutions_count(288768, foundSolutionsList, job1)
+
+    def test_challenge_performance(self):
+      job1 = "$3N:59E:57E:54E:48E:38E:53E:37E:52E:34E:55E:29E:43E:47E:35E:2E:18N:228S:224W:247N:90E:229E:89W:219E:245E:253S:158W:170N:238W:254W:99W:58S:19N:.:.:.:.:.:.:.:.:.:.:.:.:.:86E:22S:23N:.:.:.:.:.:.:.:.:.:.:.:.:.:121S:50S:7N:.:.:.:.:.:.:.:.:.:.:.:.:.:235S:17S:51N:.:.:.:.:.:.:.:.:.:.:.:.:.:107W:42S:12N:.:.:.:.:.:.:.:.:.:.:.:.:.:124E:46S:49N:.:.:.:.:.:.:.:.:.:.:.:.:.:230W:45S:11N:.:.:.:.:.:.:.:.:.:.:.:.:.:231E:33S:44N:.:.:.:.:.:.:.:.:.:.:.:.:.:202W:40S:10N:.:.:.:.:.:.:.:.:.:.:.:.:.:192E:20S:21N:.:.:.:.:.:.:.:.:.:.:.:.:.:209W:39S:5N:.:.:.:.:.:.:.:.:.:.:.:.:.:117W:13S:14N:.:.:.:.:.:.:.:.:.:.:.:.:.:131E:24S:6N:.:.:.:.:.:.:.:.:126W:141W:88S:73N:198W:252E:32S:1W:41W:4W:9W:36W:8W:25W:15W:26W:27W:28W:31W:30W:16W:56W:0S:;"
+      foundSolutions = self.execute_challenge_test([job1])
+      foundSolutionsList = foundSolutions[job1]
+      self.assert_solutions_count(0, foundSolutionsList, job1)
       
 if __name__ == '__main__':
     unittest.main()

@@ -285,7 +285,7 @@ void fillPiecesOrientees()
 
 }
 
-void findPiecesByConstraintsAndId( int constraintWest, int constraintNorth, int constraintEast, int constraintSouth, short constraintPieceId, OrientedPiece** result ) 
+void findPiece( int constraintWest, int constraintNorth, int constraintEast, int constraintSouth, short constraintPieceId, Direction orientation, OrientedPiece** result ) 
 {
 	std::vector<OrientedPiece*>* candidatePieces = new std::vector<OrientedPiece*>();
 
@@ -293,7 +293,7 @@ void findPiecesByConstraintsAndId( int constraintWest, int constraintNorth, int 
 
 	for( OrientedPiece* candidate : *candidatePieces )
 	{
-		if( candidate->Origin->id == constraintPieceId ) 
+		if( candidate->Origin->id == constraintPieceId && candidate->Orientation == orientation ) 
 		{
 			*result = candidate;
 			break;

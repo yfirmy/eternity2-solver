@@ -131,7 +131,7 @@ void E2Job::LoadToBoard()
 					default: break;
 					}
 
-					findPiecesByConstraintsAndId( constraint->West, constraint->North, constraint->East, constraint->South, p->id, orientedPiece );
+					findPiece( constraint->West, constraint->North, constraint->East, constraint->South, p->id, orientation, orientedPiece );
 					if( orientedPiece != NULL ) 
 					{
 						pos->Here = *orientedPiece;

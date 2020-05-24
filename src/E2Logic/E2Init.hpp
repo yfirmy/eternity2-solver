@@ -15,6 +15,6 @@ void Reinitialisation();
 void Indexation();
 
 void findPiecesByConstraints( int constraintWest, int constraintNorth, int constraintEast, int constraintSouth, std::vector<OrientedPiece*>* result );
-void findPiecesByConstraintsAndId( int constraintWest, int constraintNorth, int constraintEast, int constraintSouth, short constraintPieceId, OrientedPiece** result );
+void findPiece( int constraintWest, int constraintNorth, int constraintEast, int constraintSouth, short constraintPieceId, Direction orientation, OrientedPiece** result );
 
 #endif // E2INIT
